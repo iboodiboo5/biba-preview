@@ -1,0 +1,718 @@
+/* The simulated site: structural tokens, reset, type and layout primitives,
+   and the site chrome (header, footer, menu).
+   Everything is scoped to #site. The Direction (styles/directions/biba.css)
+   sets the palette, type families and tone; Pages style themselves in
+   styles/pages/*.css.
+
+   Sizing rule: #site is a size container named `site`. Use @container site (...)
+   and cqi units, never @media or vw, so the Phone frame behaves like a phone. */
+
+/* ---------- Structural tokens (the Direction sets colour and type families) ---------- */
+
+#site {
+  /* Type settings */
+  --display-weight: 400;
+  --display-style: normal;
+  --display-em-style: italic;
+  --display-transform: none;
+  --display-tracking: -0.01em;
+  --display-leading: 1.02;
+  --fs-display-xl: clamp(3.2rem, 8cqi, 7rem);
+  --fs-display-l: clamp(2.6rem, 5.4cqi, 4.8rem);
+  --fs-display-m: clamp(2rem, 3.4cqi, 3rem);
+
+  --title-weight: 400;
+  --title-style: normal;
+  --title-transform: none;
+  --title-tracking: 0;
+  --fs-title: 1.5rem;
+
+  --fs-lede: 1.125rem;
+  --fs-body: 1rem;
+  --fs-meta: 0.8125rem;
+  --fs-eyebrow: 0.6875rem;
+  --fs-ui: 0.71875rem;
+  --body-weight: 400;
+  --body-leading: 1.65;
+  --eyebrow-tracking: 0.16em;
+  --ui-tracking: 0.1em;
+  --ui-weight: 500;
+
+  /* Shape and space. Every picture box is a straight rectangle. */
+  --hairline: 1px;
+  --radius-card: 0;
+  --radius-btn: 0;
+  --radius-media: 0;
+  --gutter: clamp(20px, 4.5cqi, 72px);
+  --maxw: 1360px;
+  --maxw-text: 34rem;
+  --section-y: clamp(72px, 10cqi, 160px);
+  --grid-gap-x: clamp(16px, 2.4cqi, 36px);
+  --grid-gap-y: clamp(40px, 5cqi, 72px);
+  --card-pad: 0px;
+  --card-text-pad: 16px;
+  --card-align: left;
+  --header-h: 80px;
+  --wm-h: 44px; /* height of the logo in the header */
+
+  /* Logo switches: the colour logo on light grounds, the knockout on photographs */
+  --logo-colour: block;
+  --logo-knockout: none;
+}
+
+/* ---------- Shell and reset ---------- */
+
+#site {
+  position: relative;
+  overflow: hidden;
+  container: site / inline-size;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--f-body);
+  font-weight: var(--body-weight);
+  font-size: var(--fs-body);
+  line-height: var(--body-leading);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+:where(#site) *,
+:where(#site) *::before,
+:where(#site) *::after {
+  box-sizing: border-box;
+}
+:where(#site) :where(h1, h2, h3, h4, h5, p, figure, blockquote, ul, ol, dl, dd) {
+  margin: 0;
+  padding: 0;
+}
+:where(#site) :where(ul, ol) {
+  list-style: none;
+}
+:where(#site) :where(img) {
+  display: block;
+  max-width: 100%;
+}
+:where(#site) :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+:where(#site) :where(button, input, select, textarea) {
+  font: inherit;
+  color: inherit;
+}
+#site ::selection {
+  background: var(--c-btn);
+  color: var(--c-btn-ink);
+}
+
+.site-scroll {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  overscroll-behavior: contain;
+  background: var(--c-bg);
+}
+.site-top {
+  display: contents;
+}
+.site-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+.site-layer > * {
+  pointer-events: auto;
+}
+
+/* ---------- Layout primitives ---------- */
+
+.wrap {
+  width: 100%;
+  max-width: calc(var(--maxw) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.wrap--narrow {
+  max-width: calc(52rem + 2 * var(--gutter));
+}
+.wrap--bleed {
+  max-width: none;
+  padding-inline: 0;
+}
+
+/* A surface context. Directions give it a ground and remap ink tokens inside it. */
+.s-field {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background: var(--field-bg);
+  color: var(--c-ink);
+}
+
+/* ---------- Type primitives ---------- */
+
+.s-display {
+  font-family: var(--f-display);
+  font-weight: var(--display-weight);
+  font-style: var(--display-style);
+  text-transform: var(--display-transform);
+  letter-spacing: var(--display-tracking);
+  line-height: var(--display-leading);
+  font-size: var(--fs-display-l);
+  color: var(--c-ink);
+  text-wrap: balance;
+}
+.s-display em {
+  font-style: var(--display-em-style);
+}
+.s-display--xl {
+  font-size: var(--fs-display-xl);
+}
+.s-display--m {
+  font-size: var(--fs-display-m);
+}
+
+.s-title {
+  font-family: var(--f-title);
+  font-size: var(--fs-title);
+  font-weight: var(--title-weight);
+  font-style: var(--title-style);
+  text-transform: var(--title-transform);
+  letter-spacing: var(--title-tracking);
+  line-height: 1.15;
+}
+
+.s-eyebrow {
+  font-family: var(--f-ui);
+  font-size: var(--fs-eyebrow);
+  font-weight: 400;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: var(--c-eyebrow);
+}
+
+.s-lede {
+  font-size: var(--fs-lede);
+  line-height: 1.65;
+  max-width: var(--maxw-text);
+  color: var(--c-ink-soft);
+  text-wrap: pretty;
+}
+.s-body {
+  max-width: var(--maxw-text);
+  color: var(--c-ink-soft);
+  text-wrap: pretty;
+}
+.s-meta {
+  font-family: var(--f-ui);
+  font-size: var(--fs-meta);
+  font-weight: 300;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--c-ink-soft);
+}
+.s-price {
+  font-family: var(--f-ui);
+  font-size: var(--fs-meta);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1.5;
+}
+.s-caption {
+  margin-top: 14px;
+  font-family: var(--f-ui);
+  font-size: 0.6875rem;
+  letter-spacing: var(--ui-tracking);
+  text-transform: uppercase;
+  color: var(--c-ink-soft);
+}
+
+/* ---------- Actions ---------- */
+
+.s-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8em;
+  min-height: 52px;
+  padding: 0 2.4em;
+  font-family: var(--f-ui);
+  font-size: var(--fs-ui);
+  font-weight: 400;
+  letter-spacing: var(--ui-tracking);
+  text-transform: uppercase;
+  background: var(--c-btn);
+  color: var(--c-btn-ink);
+  border: var(--hairline) solid var(--c-btn);
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  transition: background 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+}
+.s-btn:hover {
+  background: transparent;
+  color: var(--c-btn);
+}
+.s-btn--quiet {
+  background: transparent;
+  color: var(--c-ink);
+  border-color: currentColor;
+}
+.s-btn--quiet:hover {
+  background: var(--c-ink);
+  color: var(--c-bg);
+}
+
+.s-link {
+  display: inline-block;
+  padding-bottom: 5px;
+  font-family: var(--f-ui);
+  font-size: var(--fs-ui);
+  font-weight: 400;
+  letter-spacing: var(--ui-tracking);
+  text-transform: uppercase;
+  line-height: 1.4;
+  background: linear-gradient(currentColor, currentColor) left bottom / 100% 1px no-repeat;
+  transition: background-size 0.45s ease;
+}
+.s-link:hover {
+  background-size: 35% 1px;
+}
+
+/* ---------- Media ---------- */
+
+.s-media {
+  position: relative;
+  overflow: hidden;
+  background: var(--c-media-bg);
+  border-radius: var(--radius-media);
+}
+.s-media > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.s-media--portrait {
+  aspect-ratio: 2 / 3;
+}
+.s-media--landscape {
+  aspect-ratio: 3 / 2;
+}
+.s-media--wide {
+  aspect-ratio: 16 / 7;
+}
+.s-media--square {
+  aspect-ratio: 1;
+}
+/* Stand-ins are full-length portraits: crop them sensibly for other roles. */
+.s-media > img.is-standin[data-kind='detail'] {
+  object-position: 50% 30%;
+  transform-origin: 50% 30%;
+  scale: 2.2;
+}
+.s-media--wide > img.is-standin,
+.s-media--landscape > img.is-standin {
+  object-position: 50% 42%;
+}
+
+/* ---------- Section head ---------- */
+
+.sec-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: clamp(36px, 5cqi, 72px);
+}
+.sec-head__titles > * + * {
+  margin-top: 14px;
+}
+.sec-head--center {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* ---------- Site chrome: announcement and header ---------- */
+
+.site-announce {
+  padding: 9px var(--gutter);
+  background: var(--c-announce);
+  color: var(--c-announce-ink);
+  font-family: var(--f-ui);
+  font-size: 0.65625rem;
+  font-weight: 400;
+  letter-spacing: var(--ui-tracking);
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.5;
+}
+.site-announce__sep {
+  margin-inline: 0.8em;
+  opacity: 0.6;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--c-header);
+  color: var(--c-header-ink);
+  border-bottom: var(--hairline) solid var(--c-header-line);
+  transition: background 0.3s ease;
+}
+.site-header__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  height: var(--header-h);
+  max-width: calc(var(--maxw) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 2.4cqi, 40px);
+  font-family: var(--f-ui);
+  font-size: var(--fs-ui);
+  font-weight: var(--ui-weight);
+  letter-spacing: var(--ui-tracking);
+  text-transform: uppercase;
+  line-height: 1;
+}
+.site-nav--right {
+  justify-content: flex-end;
+}
+.site-nav__link {
+  position: relative;
+  padding-block: 8px;
+  white-space: nowrap;
+}
+.site-nav__link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+.site-nav__link:hover::after,
+.site-nav__link[aria-current]::after {
+  transform: scaleX(1);
+}
+.site-bag__count::before {
+  content: '(';
+}
+.site-bag__count::after {
+  content: ')';
+}
+.site-header__brand {
+  display: flex;
+  justify-content: center;
+}
+
+.site-menu-btn {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  justify-self: start;
+  padding: 8px 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--f-ui);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ui-tracking);
+  text-transform: uppercase;
+}
+.site-menu-btn__lines {
+  width: 22px;
+  height: 7px;
+  border-block: 1px solid currentColor;
+}
+.site-menu-btn__label {
+  display: none;
+}
+
+/* Overlay header: a Layout with `header: 'overlay'` puts the header over its hero.
+   Written with two classes so it outranks any Direction's header rule (C's
+   double rule, for one): an overlay header is always transparent and borderless. */
+:where(#site[data-header='overlay']) .site-top .site-header {
+  position: absolute;
+  top: auto; /* its place in the flow: just under the announcement bar, not over it */
+  left: 0;
+  right: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: var(--c-on-image);
+  --logo-colour: none;
+  --logo-knockout: block;
+}
+
+/* Tablet: three left links, the Wordmark and the right links no longer fit side
+   by side (they touch at about 900px), so the header folds into Menu · Wordmark · Bag. */
+@container site (max-width: 1000px) {
+  .site-nav--left,
+  .site-nav--right .site-nav__link:not(.site-bag) {
+    display: none;
+  }
+  .site-menu-btn {
+    display: inline-flex;
+  }
+  .site-menu-btn__label {
+    display: inline;
+  }
+}
+
+/* Phone. #site is the container, so it cannot restyle itself: the header
+   tokens go on its children. */
+@container site (max-width: 760px) {
+  .site-scroll,
+  .site-layer {
+    --header-h: 64px;
+    --wm-h: 36px;
+  }
+  .site-menu-btn__label {
+    display: none;
+  }
+  .site-announce__rest {
+    display: none;
+  }
+}
+
+/* ---------- Logo (js/wordmark.js) ----------
+   Biba: the hand-lettered logo is the name, sized by height.
+   Anaar: the pomegranate mark beside the lowercase "anaar" wordmark. */
+
+.wm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  line-height: 1;
+  color: inherit;
+  white-space: nowrap;
+}
+.wm__art {
+  position: relative;
+  flex: none;
+  display: block;
+  height: var(--wm-h);
+}
+.wm__logo {
+  height: 100%;
+  width: auto;
+}
+.wm__logo--colour {
+  display: var(--logo-colour);
+}
+.wm__logo--knockout {
+  display: var(--logo-knockout);
+}
+.wm--anaar .wm__art {
+  height: calc(var(--wm-h) * 0.8);
+}
+.wm__text {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: calc(var(--wm-h) * 0.72);
+  letter-spacing: 0;
+  transform: translateY(-0.05em);
+}
+
+/* Biba's star, drawn on its own over the i (js/wordmark.js). It sits exactly
+   where the logo's own star was cut out, and twinkles on hover, focus or tap
+   (.is-twinkling). Reduced motion: a soft fade instead of the spin. */
+.wm__star {
+  position: absolute;
+  left: 27.01%;
+  top: 14.62%;
+  width: 15.36%;
+  height: 27.86%;
+  transform-origin: 50% 52%;
+  pointer-events: none;
+}
+.wm__star-img {
+  width: 100%;
+  height: 100%;
+}
+.wm__star-img--knockout {
+  filter: brightness(0) invert(1);
+}
+.wm--star:hover .wm__star,
+.wm--star:focus-visible .wm__star,
+.wm--star.is-twinkling .wm__star {
+  animation: wm-twinkle 0.9s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+@keyframes wm-twinkle {
+  0% { transform: none; }
+  30% { transform: scale(1.4) rotate(-20deg); }
+  55% { transform: scale(0.86) rotate(12deg); }
+  78% { transform: scale(1.08) rotate(-4deg); }
+  100% { transform: none; }
+}
+@keyframes wm-twinkle-fade {
+  50% { opacity: 0.3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wm--star:hover .wm__star,
+  .wm--star:focus-visible .wm__star,
+  .wm--star.is-twinkling .wm__star {
+    animation: wm-twinkle-fade 0.6s ease;
+  }
+}
+
+/* ---------- Footer: one slim band (client: "footer is too massive") ---------- */
+
+.site-footer {
+  padding-block: 36px 22px;
+  background: var(--c-footer);
+  color: var(--c-footer-ink);
+  border-top: var(--hairline) solid var(--c-footer-line);
+  font-family: var(--f-ui);
+  font-size: 0.8125rem;
+  font-weight: 300;
+  line-height: 1.6;
+}
+.site-footer__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px 40px;
+}
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  font-size: 0.6875rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.site-footer a {
+  transition: opacity 0.3s;
+}
+/* A social handle still to come (placeholder slot, no link) */
+.site-footer__soon {
+  opacity: 0.55;
+}
+.site-footer a:hover {
+  opacity: 0.6;
+}
+.site-footer__letter {
+  width: min(280px, 100%);
+}
+.site-footer__field {
+  display: flex;
+  border-bottom: 1px solid currentColor;
+}
+.site-footer__field input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 0;
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: inherit;
+  font: inherit;
+}
+.site-footer__field input::placeholder {
+  color: inherit;
+  opacity: 0.6;
+}
+.site-footer__field button {
+  padding: 0 0 0 16px;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.65625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.site-footer__base {
+  margin-top: 26px;
+  padding-top: 16px;
+  border-top: 1px solid var(--c-footer-line);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+
+@container site (max-width: 760px) {
+  .site-footer__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .site-footer__links {
+    gap: 10px 22px;
+  }
+}
+
+/* ---------- Phone menu (lives in .site-layer) ---------- */
+
+.site-menu {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--gutter) 36px;
+  background: var(--c-menu, var(--c-bg));
+  color: var(--c-menu-ink, var(--c-ink));
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.35s ease, transform 0.35s ease, visibility 0s linear 0.35s;
+}
+#site.is-menu-open .site-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.site-menu__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-h);
+  border-bottom: var(--hairline) solid var(--c-line);
+}
+.site-menu__close {
+  padding: 8px 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--f-ui);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ui-tracking);
+  text-transform: uppercase;
+}
+.site-menu__nav {
+  flex: 1;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  margin-top: 44px;
+}
+.site-menu__nav a {
+  font-family: var(--f-display);
+  font-weight: var(--display-weight);
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+.site-menu__foot {
+  margin-top: 20px;
+  font-family: var(--f-ui);
+  font-size: var(--fs-ui);
+  letter-spacing: var(--ui-tracking);
+  text-transform: uppercase;
+}

@@ -1,0 +1,191 @@
+/* Shared components rendered by js/ui.js: piece card, sample tag, video still and
+   the placeholder page; and the size chart (js/size-chart.js).
+   The Direction's look lives in styles/directions/biba.css. */
+
+/* ---------- Piece card ---------- */
+
+.piece-card {
+  display: block;
+  padding: var(--card-pad);
+  background: var(--card-bg);
+  color: var(--c-ink);
+  border-radius: var(--radius-card);
+  text-align: var(--card-align);
+}
+.piece-card__alt {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+.piece-card:hover .piece-card__alt {
+  opacity: 1;
+}
+.piece-card__media > img:first-child {
+  transition: scale 1.2s cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+.piece-card:hover .piece-card__media > img:first-child {
+  scale: 1.03;
+}
+.piece-card__text {
+  display: grid;
+  gap: 4px;
+  padding-top: var(--card-text-pad);
+}
+.piece-card__price {
+  margin-top: 6px;
+}
+/* Sold out: a small flag on the picture, and the picture a little quieter */
+.piece-card__flag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  padding: 6px 10px 5px;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--f-ui);
+  font-size: var(--fs-eyebrow);
+  font-weight: 500;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  line-height: 1;
+}
+.piece-card.is-sold-out .piece-card__media > img {
+  filter: saturate(0.5) brightness(1.05);
+}
+.piece-card.is-sold-out .piece-card__price {
+  color: var(--c-ink-soft);
+}
+
+/* ---------- Sample tag: a stand-in Piece (piece card, Piece page) ---------- */
+
+.sample-tag {
+  justify-self: start;
+  display: inline-block;
+  font-family: var(--f-ui);
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--c-ink-soft);
+}
+.piece-card__text .sample-tag {
+  margin-top: 4px;
+}
+
+/* ---------- Video still: a "how it's made" step (Home, Our Story) ---------- */
+
+.video-still {
+  background: var(--c-media-bg);
+}
+/* A play button: a white disc with a pink triangle, marking the still as a video to come */
+.video-still__play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(40px, 4.4cqi, 56px);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--c-bg) 88%, transparent);
+  transition: scale 0.4s ease;
+}
+.video-still__play::after {
+  content: '';
+  position: absolute;
+  inset: 32% 30% 32% 38%;
+  background: var(--c-accent);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+.video-still:hover .video-still__play {
+  scale: 1.08;
+}
+.video-still__soon {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 5px 8px 4px;
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--f-ui);
+  font-size: 0.625rem;
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* ---------- Placeholder page ("coming in ticket NN") ---------- */
+
+.placeholder {
+  display: grid;
+  place-items: center;
+  min-height: calc(var(--site-vh) - var(--header-h) - 36px);
+  padding: var(--section-y) var(--gutter);
+  text-align: center;
+}
+.placeholder__inner {
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+  max-width: 38rem;
+}
+.placeholder .s-lede {
+  margin-inline: auto;
+}
+
+/* ---------- Size chart (js/size-chart.js): Piece page and Help ---------- */
+
+.size-chart {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.size-chart__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--f-ui);
+  font-size: var(--fs-meta);
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--c-ink);
+}
+.size-chart__caption {
+  padding-bottom: 10px;
+  text-align: left;
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--eyebrow-tracking);
+  text-transform: uppercase;
+  color: var(--c-eyebrow);
+}
+.size-chart__table th,
+.size-chart__table td {
+  padding: 10px 6px;
+  border-bottom: var(--hairline) solid var(--c-line);
+  text-align: center;
+  vertical-align: bottom;
+}
+.size-chart__table th:first-child {
+  padding-left: 8px;
+  text-align: left;
+}
+.size-chart__table thead th {
+  font-size: var(--fs-eyebrow);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: var(--c-ink-soft);
+}
+.size-chart__table tbody th {
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.size-chart__table tbody tr {
+  transition: background 0.3s ease;
+}
+.size-chart__table tbody tr.is-marked {
+  background: color-mix(in srgb, var(--c-accent) 10%, transparent);
+}
+.size-chart__table tbody tr.is-marked th {
+  color: var(--c-accent);
+}

@@ -1,0 +1,418 @@
+/* Review toolbar, stage and Phone frame.
+   Tool chrome only: every selector here is rt-* or the stage glue for #site.
+   Direction stylesheets never reach this file's elements. */
+
+:root {
+  --rt-h: 112px; /* kept in sync with the real height by toolbar.js */
+  --rt-bg: #161413;
+  --rt-bg-2: #221f1e;
+  --rt-ink: #e9e3dd;
+  --rt-ink-2: #9d948e;
+  --rt-line: #2e2a28;
+  --rt-accent: #de5f77;
+  --rt-scrim: rgba(22, 20, 19, 0.88);
+  --rt-shadow: rgba(0, 0, 0, 0.4);
+}
+
+/* The page is published inside claude.ai's own document, which gives body a
+   margin, a 14px system font on an off-white ground and safe-area padding on
+   :root. Set everything the tool relies on explicitly. */
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--rt-bg);
+}
+body {
+  padding: 0;
+  color: var(--rt-ink);
+  font: 400 12px/1.4 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ---------- Toolbar ---------- */
+
+.rt {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 1000;
+  background: var(--rt-bg);
+  color: var(--rt-ink);
+  font: 400 12px/1.2 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+  box-shadow: 0 1px 0 var(--rt-line);
+}
+.rt *,
+.rt *::before,
+.rt *::after {
+  box-sizing: border-box;
+}
+.rt a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.rt-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+  padding: 8px 16px;
+}
+.rt-row--controls {
+  padding-top: 0;
+  gap: 8px 22px;
+}
+.rt-spacer {
+  flex: 1;
+}
+
+.rt-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 10px;
+  margin-right: 2px;
+  border-right: 1px solid var(--rt-line);
+}
+.rt-brand__mark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rt-brand__logo {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+/* Biba's lettered logo is wide and is the name itself */
+.rt-brand__logo--biba {
+  width: auto;
+  height: 24px;
+  margin-block: -3px;
+}
+.rt-brand__name {
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+.rt-brand__sub {
+  color: var(--rt-ink-2);
+  font-size: 11px;
+}
+
+.rt-pages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+.rt-page {
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: var(--rt-ink-2);
+  transition: color 0.2s, background 0.2s;
+}
+.rt-page:hover {
+  color: var(--rt-ink);
+}
+.rt-page.is-on {
+  color: var(--rt-bg);
+  background: var(--rt-ink);
+}
+
+.rt-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rt-group__title {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--rt-ink-2);
+}
+.rt-seg {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 999px;
+  background: var(--rt-bg-2);
+}
+.rt-seg__opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 11px;
+  border-radius: 999px;
+  color: var(--rt-ink-2);
+  white-space: nowrap;
+  transition: color 0.2s, background 0.2s;
+}
+.rt-seg__opt:hover {
+  color: var(--rt-ink);
+}
+.rt-seg__opt.is-on {
+  background: var(--rt-ink);
+  color: var(--rt-bg);
+}
+
+.rt-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rt-select select {
+  appearance: none;
+  height: 28px;
+  padding: 0 28px 0 12px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--rt-bg-2)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23e9e3dd' stroke-width='1.2'/%3E%3C/svg%3E")
+    no-repeat right 11px center;
+  color: var(--rt-ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.rt-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- Hide the toolbar, and the pill that brings it back ---------- */
+
+.rt-hide,
+.rt-show {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  font: 400 12px/1.2 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+  color: var(--rt-ink);
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.rt-hide {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--rt-line);
+  transition: background 0.2s;
+}
+.rt-hide:hover {
+  background: var(--rt-bg-2);
+}
+.rt-hide:focus-visible,
+.rt-show:focus-visible {
+  outline: 1.5px solid var(--rt-accent);
+  outline-offset: 2px;
+}
+
+.rt-is-hidden .rt {
+  display: none;
+}
+/* Stays on screen for as long as the toolbar is hidden (never fades away). */
+.rt-show {
+  position: fixed;
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 1100;
+  height: 32px;
+  padding: 0 14px;
+  background: var(--rt-scrim);
+  box-shadow: 0 6px 20px -8px var(--rt-shadow);
+}
+.rt-show[hidden] {
+  display: none;
+}
+.rt-show kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 4px;
+  font: 500 10px/1 'Instrument Sans', sans-serif;
+  color: var(--rt-ink);
+  background: var(--rt-bg-2);
+  box-shadow: inset 0 -1px 0 var(--rt-line);
+}
+/* No keyboard on touch screens: drop the key hint. */
+@media (hover: none) {
+  .rt-show kbd {
+    display: none;
+  }
+}
+
+.rt-label {
+  padding: 6px 16px 7px;
+  border-top: 1px solid var(--rt-line);
+  background: #0f0e0d;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--rt-ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#rt-label {
+  color: var(--rt-ink);
+  font-weight: 500;
+}
+
+/* ---------- Compact toolbar (narrow windows) ----------
+   Below 900px the rows stop wrapping: Pages and the control groups each become
+   one sideways-scrolling row, so the toolbar stays about 100px tall and every
+   control is still one swipe away. ♡ and Favourites stay pinned on the right. */
+
+@media (max-width: 900px) {
+  .rt-row {
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding: 7px 12px;
+  }
+  .rt-row > * {
+    flex: none;
+  }
+  .rt-brand {
+    padding-right: 8px;
+    margin-right: 0;
+  }
+  .rt-brand__sub,
+  .rt-spacer {
+    display: none;
+  }
+  .rt-row--main > .rt-pages {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-right: 28px;
+  }
+  .rt-pages,
+  .rt-row--controls {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  }
+  .rt-pages::-webkit-scrollbar,
+  .rt-row--controls::-webkit-scrollbar {
+    display: none;
+  }
+  .rt-row--controls {
+    gap: 18px;
+    padding-top: 0;
+    padding-right: 28px;
+  }
+  .rt-page {
+    padding: 6px 9px;
+    white-space: nowrap;
+  }
+  .rt-group {
+    gap: 6px;
+  }
+  .rt-seg__opt {
+    padding: 0 9px;
+  }
+  /* ♡ keeps its accessible name but shows only the heart */
+  .rt .rt-fav {
+    padding: 0 9px;
+  }
+  .rt-fav__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .rt .rt-hide {
+    padding: 0 9px;
+  }
+  .rt-hide__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .rt-label {
+    padding: 5px 12px 6px;
+  }
+}
+@media (max-width: 520px) {
+  .rt-brand__name {
+    display: none;
+  }
+  .rt-brand {
+    padding-right: 6px;
+  }
+}
+
+/* ---------- Stage ---------- */
+
+.rt-stage {
+  position: fixed;
+  top: var(--rt-h);
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.rt-device-slot,
+.rt-device {
+  height: 100%;
+}
+.rt-stage[data-frame='desktop'] #site {
+  height: 100%;
+  --site-vh: calc(100dvh - var(--rt-h));
+}
+
+/* ---------- Phone frame: 390 x 844 screen, scaled to fit the stage ---------- */
+
+.rt-stage[data-frame='phone'] {
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 28px 0;
+  background:
+    radial-gradient(ellipse at 50% 0%, #efebe6 0%, #e2ddd6 60%, #d9d3cb 100%);
+}
+.rt-stage[data-frame='phone'] .rt-device-slot {
+  flex: none;
+  width: var(--device-w, 414px);
+  height: var(--device-h, 868px);
+}
+.rt-stage[data-frame='phone'] .rt-device {
+  width: 414px;
+  height: 868px;
+  padding: 12px;
+  border-radius: 60px;
+  background: #151312;
+  transform: scale(var(--device-scale, 1));
+  transform-origin: top left;
+  box-shadow:
+    inset 0 0 0 1.5px #3b3634,
+    0 40px 80px -30px rgba(60, 30, 30, 0.45),
+    0 10px 30px -10px rgba(0, 0, 0, 0.25);
+}
+.rt-stage[data-frame='phone'] #site {
+  width: 390px;
+  height: 844px;
+  border-radius: 48px;
+  --site-vh: 844px;
+}
+.rt-stage[data-frame='phone'] .site-scroll {
+  scrollbar-width: none;
+}
+.rt-stage[data-frame='phone'] .site-scroll::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,190 @@
+/* Direction · Biba (round 2, the only Direction)
+   Drawn from the client's logo and her two Prints: a white page with butter
+   and pink-gingham fields, the logo's pink for actions, dusty rose for quiet
+   accents, a warm pink-biased near-black for ink. Clean modern sans for UI and
+   reading (Instrument Sans), one characterful display serif for big lines
+   (Instrument Serif, italic accents in logo pink). Straight rectangular
+   pictures, plenty of white space. The hand-lettered logo carries the
+   whimsy; the type stays cool. Gingham is an accent in a couple of places
+   (the announcement strip, `.s-field--gingham`), never everywhere. */
+
+#site[data-dir='biba'] {
+  /* Palette, sampled from docs/client/round-2/from-client/ */
+  --butter: #fff0cf; /* logo ground */
+  --pink-gingham: #fbd2da;
+  --pink-mist: #fce4e2;
+  --butter-gingham: #f0eac3;
+  --rose: #c67582; /* dusty rose */
+  --pink: #de5f77; /* logo pink: buttons, links, the star */
+  --pink-deep: #c84b64; /* pressed and hover state of the pink */
+  --ink: #2b1b20; /* warm near-black, pink-biased */
+  --white: #ffffff;
+
+  /* Gingham, as background values (a woven check of two translucent stripes) */
+  --gingham-pink:
+    linear-gradient(90deg, rgb(222 95 119 / 0.16) 50%, transparent 50%) 0 0 / 18px 18px,
+    linear-gradient(rgb(222 95 119 / 0.16) 50%, transparent 50%) 0 0 / 18px 18px,
+    var(--pink-mist);
+  --gingham-butter:
+    linear-gradient(90deg, rgb(214 190 120 / 0.2) 50%, transparent 50%) 0 0 / 18px 18px,
+    linear-gradient(rgb(214 190 120 / 0.2) 50%, transparent 50%) 0 0 / 18px 18px,
+    var(--butter);
+
+  /* Semantic colour */
+  --c-bg: var(--white);
+  --c-surface: var(--white);
+  --c-ink: var(--ink);
+  --c-ink-soft: rgb(43 27 32 / 0.72);
+  --c-accent: var(--pink);
+  --c-eyebrow: var(--rose);
+  --c-line: rgb(198 117 130 / 0.3);
+  --c-media-bg: var(--pink-mist);
+  --c-on-image: var(--white);
+  --c-scrim: #2b1b20;
+  --c-btn: var(--pink);
+  --c-btn-hover: var(--pink-deep);
+  --c-btn-ink: var(--white);
+  --c-header: var(--white);
+  --c-header-ink: var(--ink);
+  --c-header-line: rgb(198 117 130 / 0.22);
+  --c-announce: var(--pink-mist);
+  --c-announce-ink: var(--ink);
+  --c-footer: var(--butter);
+  --c-footer-ink: var(--ink);
+  --c-footer-line: rgb(43 27 32 / 0.14);
+  --c-menu: var(--white);
+  --field-bg: var(--butter);
+  --card-bg: transparent;
+
+  /* Type */
+  --f-display: 'Instrument Serif', Georgia, serif;
+  --f-ui: 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+  --f-body: var(--f-ui);
+  --f-title: var(--f-ui);
+
+  --display-weight: 400;
+  --display-leading: 1;
+  --display-tracking: -0.012em;
+  --fs-display-xl: clamp(3.4rem, 9cqi, 8rem);
+  --fs-display-l: clamp(2.8rem, 6cqi, 5.2rem);
+  --fs-display-m: clamp(2.1rem, 3.8cqi, 3.3rem);
+
+  --title-weight: 500;
+  --title-tracking: 0;
+  --fs-title: 1rem;
+
+  --fs-lede: 1.1875rem;
+  --fs-body: 1rem;
+  --body-weight: 400;
+  --body-leading: 1.6;
+  --eyebrow-tracking: 0.16em;
+  --ui-tracking: 0.08em;
+  --ui-weight: 500;
+
+  --radius-btn: 999px;
+  --section-y: clamp(64px, 9cqi, 144px);
+  --grid-gap-x: clamp(12px, 2cqi, 28px);
+  --grid-gap-y: clamp(36px, 4.4cqi, 64px);
+  --card-text-pad: 14px;
+  --maxw-text: 32rem;
+}
+
+/* ---------- Fields ---------- */
+
+:where(#site[data-dir='biba']) .s-field {
+  --c-surface: var(--butter);
+  --c-media-bg: var(--butter-gingham);
+}
+:where(#site[data-dir='biba']) .s-field--soft {
+  --field-bg: var(--pink-mist);
+  --c-surface: var(--pink-mist);
+  --c-media-bg: var(--pink-gingham);
+}
+/* A gingham ground, for one section at most per Page */
+:where(#site[data-dir='biba']) .s-field--gingham {
+  background: var(--gingham-pink);
+  --c-surface: var(--pink-mist);
+}
+
+/* ---------- Type ---------- */
+
+:where(#site[data-dir='biba']) .s-display em {
+  color: var(--pink);
+}
+:where(#site[data-dir='biba']) .s-price {
+  letter-spacing: 0.02em;
+  font-weight: 400;
+}
+
+/* ---------- Actions: pink pills, and quiet ink outlines ---------- */
+
+:where(#site[data-dir='biba']) .s-btn {
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  padding: 0 2.2em;
+  min-height: 48px;
+}
+:where(#site[data-dir='biba']) .s-btn:hover {
+  background: var(--c-btn-hover);
+  border-color: var(--c-btn-hover);
+  color: var(--c-btn-ink);
+}
+:where(#site[data-dir='biba']) .s-btn--quiet {
+  background: transparent;
+  color: var(--c-ink);
+  border-color: currentColor;
+}
+:where(#site[data-dir='biba']) .s-btn--quiet:hover {
+  background: var(--c-ink);
+  border-color: var(--c-ink);
+  color: var(--c-bg);
+}
+:where(#site[data-dir='biba']) .s-link {
+  font-weight: 600;
+  background-image: linear-gradient(var(--pink), var(--pink));
+  background-size: 100% 1.5px;
+}
+:where(#site[data-dir='biba']) .s-link:hover {
+  background-size: 35% 1.5px;
+}
+
+/* ---------- Chrome ---------- */
+
+/* The announcement strip is pink gingham: one of the two places the pattern shows */
+:where(#site[data-dir='biba']) .site-announce {
+  background: var(--gingham-pink);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+:where(#site[data-dir='biba']) .site-nav {
+  letter-spacing: 0.1em;
+}
+:where(#site[data-dir='biba']) .site-nav__link::after {
+  height: 1.5px;
+  background: var(--pink);
+}
+:where(#site[data-dir='biba']) .site-footer__base {
+  opacity: 0.7;
+}
+:where(#site[data-dir='biba']) .site-menu__nav a {
+  font-size: 2.75rem;
+}
+
+/* ---------- Pieces ---------- */
+
+:where(#site[data-dir='biba']) .piece-card__text {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+:where(#site[data-dir='biba']) .piece-card__price {
+  margin-top: 0;
+}
+/* Two narrow cards side by side on a phone: price under the name, so one
+   card's price never runs into the next card's name */
+@container site (max-width: 760px) {
+  :where(#site[data-dir='biba']) .piece-card__text {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}

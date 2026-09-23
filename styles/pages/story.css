@@ -1,0 +1,206 @@
+/* Our Story. Owned by ticket 07 (round 2).
+   Scope every rule to .p-story or a .story-l1 class.
+   Tokens only. Sizing: @container site (max-width: ...) and cqi units, never @media or vw. */
+
+/* ================= Layout 1 · Our founder ================= */
+
+/* Intro: the title, one line, a wide picture of the Prints */
+.story-l1__intro {
+  padding-block: clamp(48px, 6cqi, 104px) clamp(56px, 6cqi, 104px);
+}
+.story-l1__intro-inner {
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  text-align: center;
+  margin-bottom: clamp(40px, 5cqi, 80px);
+}
+.story-l1__title {
+  max-width: 11em;
+  text-wrap: balance;
+}
+.story-l1__lede {
+  max-width: 34rem;
+}
+
+/* Splits: a picture and a short block of text, side by side */
+.story-l1__split {
+  padding-block: clamp(32px, 4cqi, 64px);
+}
+.story-l1__split-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: center;
+  gap: 40px clamp(40px, 7cqi, 128px);
+}
+.story-l1__split--flip .story-l1__split-grid {
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+}
+.story-l1__split--flip .story-l1__split-text {
+  order: -1;
+}
+.story-l1__split-text > * + * {
+  margin-top: 20px;
+}
+.story-l1__split-text .s-link {
+  margin-top: 32px;
+}
+
+/* The two real Prints, side by side */
+.story-l1__prints {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--grid-gap-x);
+}
+
+/* Watch us make it: three video stills on the page's one gingham field */
+.story-l1__making {
+  margin-top: clamp(48px, 6cqi, 96px);
+  padding-block: var(--section-y);
+}
+/* The heading sits on a white card, like a label on the gingham */
+.story-l1__making-head {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  max-width: 40rem;
+  margin: 0 auto clamp(40px, 5cqi, 64px);
+  padding: clamp(28px, 3.4cqi, 48px) clamp(24px, 4cqi, 64px);
+  background: var(--c-bg);
+  text-align: center;
+}
+.story-l1__reels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--grid-gap-x);
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+/* Each still in a white frame, snapshot-style */
+.story-l1__reel {
+  padding: 10px 10px 16px;
+  background: var(--c-bg);
+}
+.story-l1__reel-title {
+  margin-top: 14px;
+  padding-inline: 4px;
+  font-family: var(--f-ui);
+  font-weight: var(--title-weight);
+  color: var(--c-ink);
+}
+.story-l1__reel-title .s-meta {
+  margin-right: 6px;
+  color: var(--c-accent);
+}
+
+/* Who it is for */
+.story-l1__for {
+  padding-block: var(--section-y) clamp(56px, 6cqi, 96px);
+}
+.story-l1__for-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  align-items: center;
+  gap: 40px clamp(40px, 7cqi, 128px);
+}
+.story-l1__for-text > * + * {
+  margin-top: 20px;
+}
+.story-l1__facts {
+  display: grid;
+  margin-top: 32px !important;
+  border-top: var(--hairline) solid var(--c-line);
+}
+.story-l1__facts > div {
+  display: grid;
+  grid-template-columns: 10em minmax(0, 1fr);
+  align-items: baseline;
+  gap: 16px;
+  padding-block: 12px;
+  border-bottom: var(--hairline) solid var(--c-line);
+}
+.story-l1__facts dd {
+  margin: 0;
+  color: var(--c-ink);
+}
+
+/* Follow along: placeholder slots for the brand's handles */
+.story-l1__follow {
+  padding-block: clamp(56px, 6cqi, 96px);
+}
+.story-l1__follow-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 32px clamp(32px, 5cqi, 80px);
+}
+.story-l1__follow-inner > div > * + * {
+  margin-top: 12px;
+}
+.story-l1__social {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.story-l1__social-name {
+  font-family: var(--f-ui);
+  font-size: var(--fs-ui);
+  font-weight: var(--ui-weight);
+  letter-spacing: var(--ui-tracking);
+  text-transform: uppercase;
+  color: var(--c-ink);
+}
+
+/* ================= Tablet ================= */
+
+@container site (max-width: 1080px) {
+  .story-l1__follow-inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ================= Phone ================= */
+
+@container site (max-width: 760px) {
+  .story-l1__intro {
+    padding-block: 40px 48px;
+  }
+  .story-l1__intro-inner {
+    justify-items: start;
+    text-align: left;
+    margin-bottom: 32px;
+  }
+  .story-l1__hero .s-media--wide {
+    aspect-ratio: 4 / 3;
+  }
+  .story-l1__split-grid,
+  .story-l1__split--flip .story-l1__split-grid,
+  .story-l1__for-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  .story-l1__split--flip .story-l1__split-text {
+    order: 0;
+  }
+  .story-l1__split {
+    padding-block: 28px;
+  }
+  .story-l1__making-head {
+    justify-items: start;
+    text-align: left;
+    padding: 28px 20px;
+  }
+  .story-l1__reels {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+  .story-l1__still.s-media--portrait {
+    aspect-ratio: 4 / 5;
+  }
+  .story-l1__facts > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+}

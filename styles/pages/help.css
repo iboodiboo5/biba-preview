@@ -1,0 +1,331 @@
+/* Help. Owned by ticket 07 (round 2).
+   Scope every rule to .p-help or a .help-l1 class.
+   Tokens only. Sizing: @container site (max-width: ...) and cqi units, never @media or vw. */
+
+/* ================= Layout 1 · Client care ================= */
+
+.help-l1 [data-topic] {
+  scroll-margin-top: calc(var(--header-h) + 24px);
+}
+
+/* ---------- Intro and topic jumps ---------- */
+
+.help-l1__intro {
+  padding-block: clamp(48px, 6cqi, 112px) clamp(44px, 5cqi, 88px);
+}
+.help-l1__intro-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 36px clamp(40px, 7cqi, 136px);
+}
+.help-l1__intro-text > * + * {
+  margin-top: 20px;
+}
+.help-l1__topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.help-l1__topic {
+  min-height: 40px;
+  padding: 0 18px;
+  border: var(--hairline) solid var(--c-ink);
+  border-radius: var(--radius-btn);
+  background: transparent;
+  color: var(--c-ink);
+  font-family: var(--f-ui);
+  font-size: var(--fs-ui);
+  font-weight: var(--ui-weight);
+  letter-spacing: var(--ui-tracking);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.help-l1__topic:hover {
+  background: var(--c-accent);
+  border-color: var(--c-accent);
+  color: var(--c-btn-ink);
+}
+
+/* ---------- At a glance ---------- */
+
+.help-l1__glance {
+  padding-block: clamp(40px, 4.4cqi, 72px);
+}
+.help-l1__glance-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px var(--grid-gap-x);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.help-l1__glance-list > li {
+  padding-top: 16px;
+  border-top: 1.5px solid var(--c-accent);
+}
+.help-l1__glance-text {
+  margin-top: 8px;
+  font-family: var(--f-display);
+  font-size: clamp(1.3rem, 1.8cqi, 1.7rem);
+  line-height: 1.2;
+  color: var(--c-ink);
+}
+
+/* ---------- Size chart ---------- */
+
+.help-l1__sizes {
+  padding-block: var(--section-y);
+}
+.help-l1__sizes-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 48px clamp(48px, 7cqi, 128px);
+}
+.help-l1__sizes-main > .sec-head {
+  margin-bottom: 20px;
+}
+.help-l1__chart {
+  margin-top: clamp(28px, 3.4cqi, 48px);
+}
+.help-l1__chart-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+.help-l1__units {
+  display: inline-flex;
+  padding: 3px;
+  border: var(--hairline) solid var(--c-line);
+  border-radius: var(--radius-btn);
+  background: var(--c-bg);
+}
+.help-l1__units button {
+  min-width: 44px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: var(--radius-btn);
+  background: none;
+  cursor: pointer;
+  font-family: var(--f-ui);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--ui-tracking);
+  text-transform: uppercase;
+  color: var(--c-ink-soft);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+.help-l1__units button[aria-pressed='true'] {
+  background: var(--c-accent);
+  color: var(--c-btn-ink);
+}
+
+/* The table is the shared .size-chart (styles/components.css); Help sets it larger
+   and left-aligned. */
+.help-l1__chart .size-chart__table {
+  font-size: 1rem;
+}
+.help-l1__chart .size-chart__table th,
+.help-l1__chart .size-chart__table td {
+  padding: 14px 8px;
+  border-bottom: var(--hairline) solid var(--c-line);
+  text-align: left;
+  font-weight: 400;
+}
+.help-l1__chart .size-chart__table th:first-child {
+  padding-left: 0;
+}
+.help-l1__chart .size-chart__table thead th {
+  padding-block: 10px;
+  border-bottom-color: var(--c-ink);
+  font-family: var(--f-ui);
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-ink-soft);
+  vertical-align: bottom;
+}
+.help-l1__chart .size-chart__table tbody th {
+  font-family: var(--f-ui);
+  font-size: var(--fs-ui);
+  font-weight: 600;
+  letter-spacing: var(--ui-tracking);
+  color: var(--c-accent);
+}
+.help-l1__chart .size-chart__table td {
+  font-family: var(--f-ui);
+  font-size: 1rem;
+  color: var(--c-ink);
+}
+
+.help-l1__measure {
+  padding: clamp(24px, 3cqi, 40px);
+  background: var(--c-bg);
+}
+.help-l1__measure-list {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0 20px;
+  padding: 0;
+  list-style: none;
+}
+.help-l1__measure-list li {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 12px;
+  border-bottom: var(--hairline) solid var(--c-line);
+}
+.help-l1__measure-title {
+  font-family: var(--f-ui);
+  font-weight: var(--title-weight);
+  color: var(--c-ink);
+}
+.help-l1__inline {
+  color: var(--c-accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- Questions and answers ---------- */
+
+.help-l1__faq {
+  padding-block: var(--section-y);
+}
+.help-l1__faq-group + .help-l1__faq-group {
+  margin-top: clamp(40px, 4.4cqi, 64px);
+}
+.help-l1__faq-head {
+  padding-bottom: 12px;
+  border-bottom: var(--hairline) solid var(--c-ink);
+}
+.help-l1__qa {
+  border-bottom: var(--hairline) solid var(--c-line);
+}
+.help-l1__qa summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 0;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--f-ui);
+  font-weight: var(--title-weight);
+  font-size: 1.0625rem;
+  line-height: 1.4;
+  color: var(--c-ink);
+}
+.help-l1__qa summary::-webkit-details-marker {
+  display: none;
+}
+.help-l1__qa summary:focus-visible {
+  outline: 1px solid var(--c-ink);
+  outline-offset: 4px;
+}
+.help-l1__plus {
+  position: relative;
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+.help-l1__plus::before,
+.help-l1__plus::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1.5px;
+  background: var(--c-accent);
+  transition: rotate 0.4s ease;
+}
+.help-l1__plus::after {
+  rotate: 90deg;
+}
+.help-l1__qa[open] .help-l1__plus::after {
+  rotate: 0deg;
+}
+.help-l1__qa > .s-body {
+  max-width: 40rem;
+  padding: 0 40px 22px 0;
+}
+
+/* ---------- Contact ---------- */
+
+.help-l1__contact {
+  padding-block: var(--section-y);
+  border-top: var(--hairline) solid var(--c-line);
+}
+.help-l1__contact-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 32px clamp(40px, 6cqi, 120px);
+}
+.help-l1__contact-text > * + * {
+  margin-top: 18px;
+}
+.help-l1__contact-actions {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .help-l1__plus::before,
+  .help-l1__plus::after,
+  .help-l1__topic,
+  .help-l1__units button {
+    transition: none;
+  }
+}
+
+/* ---------- Tablet ---------- */
+
+@container site (max-width: 1080px) {
+  .help-l1__intro-grid,
+  .help-l1__sizes-grid,
+  .help-l1__contact-inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .help-l1__glance-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Phone ---------- */
+
+@container site (max-width: 760px) {
+  .help-l1__intro {
+    padding-block: 40px 36px;
+  }
+  .help-l1__topic {
+    min-height: 36px;
+    padding: 0 14px;
+  }
+  .help-l1__glance-list {
+    gap: 24px 16px;
+  }
+  .help-l1__chart .size-chart__table th,
+  .help-l1__chart .size-chart__table td {
+    padding: 12px 4px;
+  }
+  .help-l1__chart .size-chart__table thead th {
+    font-size: 0.5625rem;
+    letter-spacing: 0.08em;
+  }
+  .help-l1__chart .size-chart__table td {
+    font-size: 0.9375rem;
+  }
+  .help-l1__qa > .s-body {
+    padding-right: 0;
+  }
+  .help-l1__contact-actions .s-btn {
+    width: 100%;
+  }
+}

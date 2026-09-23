@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<style>
+  :root { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  body { margin: 0; font: 14px/1.5 system-ui, -apple-system, sans-serif; background: #faf9f5; color: #141413; }
+</style>
+</head>
+<body>
+<title>Website preview</title>
+<!--
+  No doctype, html, head or body tags: claude.ai wraps a published artifact in
+  its own document. Browsers build the same tree when this file is opened
+  locally (tools/serve.py), so it works in both places.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap">
+
+<!-- Review tool (never styled by a Direction) -->
+<link rel="stylesheet" href="styles/toolbar.css">
+<link rel="stylesheet" href="styles/favourites.css">
+
+<!-- The site: shared base, then the Direction's token file (Biba, the only one) -->
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/components.css">
+<link rel="stylesheet" href="styles/directions/biba.css">
+
+<!-- One stylesheet per Page, each owned by that Page's ticket -->
+<link rel="stylesheet" href="styles/pages/home.css">
+<link rel="stylesheet" href="styles/pages/collection.css">
+<link rel="stylesheet" href="styles/pages/piece.css">
+<link rel="stylesheet" href="styles/pages/story.css">
+<link rel="stylesheet" href="styles/pages/bag.css">
+<link rel="stylesheet" href="styles/pages/help.css">
+
+<div id="rt" class="rt" aria-label="Review toolbar"></div>
+
+<div id="stage" class="rt-stage" data-frame="desktop">
+  <div class="rt-device-slot">
+    <div class="rt-device">
+      <div id="site" data-dir="biba" data-name="biba">
+        <div class="site-scroll">
+          <div class="site-top"></div>
+          <main class="site-main"></main>
+          <div class="site-bottom"></div>
+        </div>
+        <div class="site-layer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+
+</body>
+</html>
