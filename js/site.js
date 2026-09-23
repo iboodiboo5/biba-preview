@@ -3,11 +3,11 @@
 
 import { serialise, effectiveLayout } from './state.js';
 import { pageByKey } from './pages.js';
-import { PIECES, DROP, DISPATCH, DELIVERY, pieceByKey, whatsappLink } from './pieces.js';
+import { PIECES, DROP, DISPATCH, pieceByKey, whatsappLink } from './pieces.js';
 import { brandFor } from './brand.js';
 import { img, pieceImg, resolve, pieceImageName } from './images.js';
 import { wordmark } from './wordmark.js';
-import { html, placeholder } from './ui.js';
+import { html, placeholder, motif } from './ui.js';
 import * as bag from './bag-store.js';
 
 const $ = (sel) => document.querySelector(sel);
@@ -103,8 +103,26 @@ export async function renderSite(s) {
   const viewKey = `${s.page}|${s.piece}|${ctx.layout}`;
   if (viewKey !== lastViewKey) scroller.scrollTop = 0;
   lastViewKey = viewKey;
+  updateHeader();
   fitDevice();
 }
+
+/* ---------- Overlay header: see-through over the banner, then a solid bar ---------- */
+
+// A Layout with `header: 'overlay'` (Home) floats the header over its first
+// section while that section sits at rest under it. As soon as the section
+// starts sliding up under the stuck header (a see-through bar there would
+// collide with the banner's own caption), #site gets .is-header-solid and the
+// header becomes a solid sticky bar (styles/base.css).
+const SOLID_AFTER = 24; // px of banner scrolled under the stuck header
+function updateHeader() {
+  const overlay = site.dataset.header === 'overlay';
+  const banner = overlay && main.querySelector('.page > :first-child');
+  let solid = false;
+  if (banner) solid = banner.getBoundingClientRect().top < scroller.getBoundingClientRect().top - SOLID_AFTER;
+  site.classList.toggle('is-header-solid', solid);
+}
+scroller.addEventListener('scroll', updateHeader, { passive: true });
 
 /* ---------- Browser tab: title and icon follow the Name ---------- */
 
@@ -150,7 +168,7 @@ function bagLink(ctx, cls = '') {
 function header(ctx) {
   return html`
     <div class="site-announce">
-      <p>Dispatched in ${DISPATCH.days}<span class="site-announce__rest"><span class="site-announce__sep">·</span>${DELIVERY.text.replace(/\.$/, '')}</span></p>
+      <p>Dispatched in ${DISPATCH.days}</p>
     </div>
     <header class="site-header">
       <div class="site-header__inner">
@@ -177,6 +195,7 @@ function footer(ctx) {
         <div class="site-footer__top">
           <div class="site-footer__brand">
             ${wordmark(ctx.brand, { href: ctx.href({ page: 'home' }) })}
+            ${motif('sprig', 'site-footer__motif')}
           </div>
           <ul class="site-footer__links">
             ${link('collection', 'Shop')}${link('story', 'Our story')}${link('help', 'Sizes')}${link('help', 'Delivery and exchanges')}
@@ -213,7 +232,10 @@ function menu(ctx) {
       <nav class="site-menu__nav">
         ${items.map((i) => `<a href="${ctx.href({ page: i.page })}">${i.label}</a>`)}
       </nav>
-      <p class="site-menu__foot">${bagLink(ctx)}</p>
+      <div class="site-menu__foot">
+        ${bagLink(ctx)}
+        <a class="s-btn site-menu__wa" href="${whatsappLink(ctx.brand.hello('I have a question.'))}" target="_blank" rel="noopener">Message us on WhatsApp</a>
+      </div>
     </div>`;
 }
 

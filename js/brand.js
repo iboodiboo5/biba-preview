@@ -24,8 +24,11 @@ export const NAMES = [
 
 // Lines shared by both Names. They read the name from the record they belong to.
 // No email yet: the address waits until the name is decided.
+// Customer-facing copy is lowercase ("prints", "pieces"): the glossary's capitals are for the team.
+// The brand line's own hyphens are non-breaking (U+2011), so it never breaks at "pure-|cotton".
+const NBH = '\u2011';
 const SHARED = {
-  line: (b) => `${b.name} makes happy, pure-cotton clothes with hand-painted Prints, in Pakistan.`,
+  line: (b) => `${b.name} makes happy, pure${NBH}cotton clothes with hand${NBH}painted prints, in Pakistan.`,
   hello: (b, text = '') => `Hello ${b.name}${text ? `, ${text}` : ''}`,
 };
 

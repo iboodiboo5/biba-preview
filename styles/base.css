@@ -27,11 +27,14 @@
   --title-tracking: 0;
   --fs-title: 1.5rem;
 
+  /* Round 3 type scale: nothing a customer reads is under 12px. */
   --fs-lede: 1.125rem;
+  --fs-h3: 1.1875rem; /* 19px: the step between body and display (small headings, prices on a Piece) */
   --fs-body: 1rem;
-  --fs-meta: 0.8125rem;
-  --fs-eyebrow: 0.6875rem;
-  --fs-ui: 0.71875rem;
+  --fs-meta: 0.875rem; /* 14px: small body text */
+  --fs-ui: 0.8125rem; /* 13px: buttons, form labels, nav */
+  --fs-eyebrow: 0.75rem; /* 12px, weight 500: small capitals (the floor) */
+  --fs-input: 1rem; /* 16px: every input, so iOS never zooms */
   --body-weight: 400;
   --body-leading: 1.65;
   --eyebrow-tracking: 0.16em;
@@ -44,16 +47,22 @@
   --radius-btn: 0;
   --radius-media: 0;
   --gutter: clamp(20px, 4.5cqi, 72px);
-  --maxw: 1360px;
-  --maxw-text: 34rem;
+  /* Round 3 widths: one page width and one text width for every section.
+     .wrap uses --w-page, .wrap--narrow --w-text; the header and footer use --w-page. */
+  --w-page: 1280px;
+  --w-text: 46rem;
+  --maxw: var(--w-page); /* older name, kept */
+  --maxw-text: 34rem; /* a paragraph's measure (.s-lede, .s-body), not a section width */
+  --tap: 44px; /* smallest tap target */
   --section-y: clamp(72px, 10cqi, 160px);
   --grid-gap-x: clamp(16px, 2.4cqi, 36px);
   --grid-gap-y: clamp(40px, 5cqi, 72px);
   --card-pad: 0px;
   --card-text-pad: 16px;
   --card-align: left;
-  --header-h: 80px;
-  --wm-h: 44px; /* height of the logo in the header */
+  --header-h: 92px;
+  --header-h-solid: 52px; /* Home's solid sticky bar once the banner scrolls under it */
+  --wm-h: 70px; /* height of the logo in the header: Biba about 124px wide */
 
   /* Logo switches: the colour logo on light grounds, the knockout on photographs */
   --logo-colour: block;
@@ -100,6 +109,11 @@
   font: inherit;
   color: inherit;
 }
+/* Every text field is 16px, so iOS never zooms in on focus. An id selector on
+   purpose: it outranks Page rules. */
+#site :is(input:not([type='checkbox'], [type='radio'], [type='range']), select, textarea) {
+  font-size: var(--fs-input);
+}
 #site ::selection {
   background: var(--c-btn);
   color: var(--c-btn-ink);
@@ -130,12 +144,12 @@
 
 .wrap {
   width: 100%;
-  max-width: calc(var(--maxw) + 2 * var(--gutter));
+  max-width: calc(var(--w-page) + 2 * var(--gutter));
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
 .wrap--narrow {
-  max-width: calc(52rem + 2 * var(--gutter));
+  max-width: calc(var(--w-text) + 2 * var(--gutter));
 }
 .wrap--bleed {
   max-width: none;
@@ -187,7 +201,7 @@
 .s-eyebrow {
   font-family: var(--f-ui);
   font-size: var(--fs-eyebrow);
-  font-weight: 400;
+  font-weight: 500;
   letter-spacing: var(--eyebrow-tracking);
   text-transform: uppercase;
   line-height: 1.5;
@@ -209,9 +223,9 @@
 .s-meta {
   font-family: var(--f-ui);
   font-size: var(--fs-meta);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.5;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   color: var(--c-ink-soft);
 }
 .s-price {
@@ -225,7 +239,8 @@
 .s-caption {
   margin-top: 14px;
   font-family: var(--f-ui);
-  font-size: 0.6875rem;
+  font-size: var(--fs-eyebrow);
+  font-weight: 500;
   letter-spacing: var(--ui-tracking);
   text-transform: uppercase;
   color: var(--c-ink-soft);
@@ -298,6 +313,9 @@
 .s-media--portrait {
   aspect-ratio: 2 / 3;
 }
+.s-media--card {
+  aspect-ratio: 4 / 5; /* the piece card (round 3) */
+}
 .s-media--landscape {
   aspect-ratio: 3 / 2;
 }
@@ -343,16 +361,12 @@
   background: var(--c-announce);
   color: var(--c-announce-ink);
   font-family: var(--f-ui);
-  font-size: 0.65625rem;
-  font-weight: 400;
+  font-size: var(--fs-eyebrow);
+  font-weight: 500;
   letter-spacing: var(--ui-tracking);
   text-transform: uppercase;
   text-align: center;
   line-height: 1.5;
-}
-.site-announce__sep {
-  margin-inline: 0.8em;
-  opacity: 0.6;
 }
 
 .site-header {
@@ -369,9 +383,10 @@
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   height: var(--header-h);
-  max-width: calc(var(--maxw) + 2 * var(--gutter));
+  max-width: calc(var(--w-page) + 2 * var(--gutter));
   margin-inline: auto;
   padding-inline: var(--gutter);
+  transition: height 0.3s ease;
 }
 .site-nav {
   display: flex;
@@ -389,7 +404,9 @@
 }
 .site-nav__link {
   position: relative;
-  padding-block: 8px;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
   white-space: nowrap;
 }
 .site-nav__link::after {
@@ -397,7 +414,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: 10px;
   height: 1px;
   background: currentColor;
   transform: scaleX(0);
@@ -424,7 +441,9 @@
   align-items: center;
   gap: 10px;
   justify-self: start;
-  padding: 8px 0;
+  min-width: var(--tap);
+  min-height: var(--tap);
+  padding: 0;
   background: none;
   border: 0;
   cursor: pointer;
@@ -442,20 +461,42 @@
   display: none;
 }
 
-/* Overlay header: a Layout with `header: 'overlay'` puts the header over its hero.
-   Written with two classes so it outranks any Direction's header rule (C's
-   double rule, for one): an overlay header is always transparent and borderless. */
+/* Overlay header: a Layout with `header: 'overlay'` puts the header over its
+   banner. It is sticky with a negative bottom margin, so it takes no room (the
+   banner starts under it) and stays reachable all the way down. While it is
+   over the banner at rest it is see-through; once the banner starts sliding under it,
+   site.js sets #site.is-header-solid and it becomes a solid bar
+   --header-h-solid tall (the header box keeps its height, so nothing below
+   jumps; the part under the bar lets clicks through). */
 :where(#site[data-header='overlay']) .site-top .site-header {
-  position: absolute;
-  top: auto; /* its place in the flow: just under the announcement bar, not over it */
-  left: 0;
-  right: 0;
+  height: var(--header-h);
+  margin-bottom: calc(-1 * var(--header-h));
   background: transparent;
   border: 0;
   box-shadow: none;
+  pointer-events: none;
   color: var(--c-on-image);
   --logo-colour: none;
   --logo-knockout: block;
+  --wm-ink: currentColor;
+}
+:where(#site[data-header='overlay']) .site-top .site-header__inner {
+  pointer-events: auto;
+  transition: height 0.3s ease, background 0.3s ease;
+}
+:where(#site[data-header='overlay'].is-header-solid) .site-top .site-header {
+  color: var(--c-header-ink);
+  --logo-colour: block;
+  --logo-knockout: none;
+  --wm-ink: var(--c-logo, currentColor);
+  --wm-h: calc(var(--header-h-solid) - 12px);
+}
+:where(#site[data-header='overlay'].is-header-solid) .site-top .site-header__inner {
+  height: var(--header-h-solid);
+  max-width: none;
+  padding-inline: max(var(--gutter), calc((100% - var(--w-page)) / 2));
+  background: var(--c-header);
+  border-bottom: var(--hairline) solid var(--c-header-line);
 }
 
 /* Tablet: three left links, the Wordmark and the right links no longer fit side
@@ -478,13 +519,10 @@
 @container site (max-width: 760px) {
   .site-scroll,
   .site-layer {
-    --header-h: 64px;
-    --wm-h: 36px;
+    --header-h: 68px;
+    --wm-h: 54px; /* Biba about 96px wide */
   }
   .site-menu-btn__label {
-    display: none;
-  }
-  .site-announce__rest {
     display: none;
   }
 }
@@ -517,15 +555,21 @@
 .wm__logo--knockout {
   display: var(--logo-knockout);
 }
+/* Anaar: the mark and the word together come to about Biba's width, and the
+   word is in logo pink (white over a photograph). */
+.wm--anaar {
+  gap: 0.35em;
+}
 .wm--anaar .wm__art {
-  height: calc(var(--wm-h) * 0.8);
+  height: calc(var(--wm-h) * 0.62);
 }
 .wm__text {
   font-family: var(--f-display);
   font-style: italic;
   font-weight: 400;
-  font-size: calc(var(--wm-h) * 0.72);
+  font-size: calc(var(--wm-h) * 0.6);
   letter-spacing: 0;
+  color: var(--wm-ink, var(--c-logo, currentColor));
   transform: translateY(-0.05em);
 }
 
@@ -583,6 +627,17 @@
   font-weight: 300;
   line-height: 1.6;
 }
+.site-footer {
+  --wm-h: 48px;
+}
+.site-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.site-footer__motif {
+  --motif-h: 34px;
+}
 .site-footer__top {
   display: flex;
   flex-wrap: wrap;
@@ -593,10 +648,22 @@
 .site-footer__links {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 28px;
-  font-size: 0.6875rem;
-  letter-spacing: 0.16em;
+  gap: 0 28px;
+  font-size: var(--fs-eyebrow);
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+/* Each link is a 44px-tall tap target */
+.site-footer__links > li {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap);
+}
+.site-footer__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
 }
 .site-footer a {
   transition: opacity 0.3s;
@@ -618,12 +685,14 @@
 .site-footer__field input {
   flex: 1;
   min-width: 0;
+  min-height: var(--tap);
   padding: 8px 0;
   background: transparent;
   border: 0;
   outline: none;
   color: inherit;
   font: inherit;
+  font-size: var(--fs-input);
 }
 .site-footer__field input::placeholder {
   color: inherit;
@@ -635,15 +704,17 @@
   border: 0;
   color: inherit;
   cursor: pointer;
-  font-size: 0.65625rem;
-  letter-spacing: 0.2em;
+  min-height: var(--tap);
+  font-size: var(--fs-ui);
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 .site-footer__base {
   margin-top: 26px;
   padding-top: 16px;
   border-top: 1px solid var(--c-footer-line);
-  font-size: 0.6875rem;
+  font-size: var(--fs-eyebrow);
   letter-spacing: 0.08em;
   opacity: 0.75;
 }
@@ -654,7 +725,7 @@
     align-items: flex-start;
   }
   .site-footer__links {
-    gap: 10px 22px;
+    gap: 0 22px;
   }
 }
 
@@ -687,7 +758,9 @@
   border-bottom: var(--hairline) solid var(--c-line);
 }
 .site-menu__close {
-  padding: 8px 0;
+  min-width: var(--tap);
+  min-height: var(--tap);
+  padding: 0;
   background: none;
   border: 0;
   cursor: pointer;
@@ -710,9 +783,16 @@
   line-height: 1.2;
 }
 .site-menu__foot {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
   margin-top: 20px;
   font-family: var(--f-ui);
   font-size: var(--fs-ui);
   letter-spacing: var(--ui-tracking);
   text-transform: uppercase;
+}
+.site-menu__wa {
+  width: 100%;
+  min-height: 48px;
 }

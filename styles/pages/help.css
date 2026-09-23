@@ -15,7 +15,7 @@
 }
 .help-l1__intro-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
   gap: 36px clamp(40px, 7cqi, 136px);
 }
@@ -25,11 +25,12 @@
 .help-l1__topics {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 .help-l1__topic {
-  min-height: 40px;
-  padding: 0 18px;
+  min-height: 44px;
+  padding: 0 16px;
+  white-space: nowrap;
   border: var(--hairline) solid var(--c-ink);
   border-radius: var(--radius-btn);
   background: transparent;
@@ -65,8 +66,14 @@
   padding-top: 16px;
   border-top: 1.5px solid var(--c-accent);
 }
+.help-l1__glance-label {
+  font-family: var(--f-ui);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--c-ink-soft);
+}
 .help-l1__glance-text {
-  margin-top: 8px;
+  margin-top: 6px;
   font-family: var(--f-display);
   font-size: clamp(1.3rem, 1.8cqi, 1.7rem);
   line-height: 1.2;
@@ -99,14 +106,15 @@
 }
 .help-l1__units {
   display: inline-flex;
-  padding: 3px;
+  padding: 2px;
   border: var(--hairline) solid var(--c-line);
   border-radius: var(--radius-btn);
   background: var(--c-bg);
 }
 .help-l1__units button {
-  min-width: 44px;
-  padding: 6px 12px;
+  min-width: 48px;
+  min-height: 44px;
+  padding: 0 14px;
   border: 0;
   border-radius: var(--radius-btn);
   background: none;
@@ -135,6 +143,7 @@
   border-bottom: var(--hairline) solid var(--c-line);
   text-align: left;
   font-weight: 400;
+  vertical-align: baseline;
 }
 .help-l1__chart .size-chart__table th:first-child {
   padding-left: 0;
@@ -143,8 +152,9 @@
   padding-block: 10px;
   border-bottom-color: var(--c-ink);
   font-family: var(--f-ui);
-  font-size: 0.625rem;
-  letter-spacing: 0.14em;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--c-ink-soft);
   vertical-align: bottom;
@@ -185,6 +195,9 @@
   color: var(--c-ink);
 }
 .help-l1__inline {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--c-accent);
   font-weight: 600;
   text-decoration: underline;
@@ -200,6 +213,10 @@
   margin-top: clamp(40px, 4.4cqi, 64px);
 }
 .help-l1__faq-head {
+  font-family: var(--f-ui);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--c-ink);
   padding-bottom: 12px;
   border-bottom: var(--hairline) solid var(--c-ink);
 }
@@ -305,7 +322,6 @@
     padding-block: 40px 36px;
   }
   .help-l1__topic {
-    min-height: 36px;
     padding: 0 14px;
   }
   .help-l1__glance-list {
@@ -316,8 +332,7 @@
     padding: 12px 4px;
   }
   .help-l1__chart .size-chart__table thead th {
-    font-size: 0.5625rem;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.04em;
   }
   .help-l1__chart .size-chart__table td {
     font-size: 0.9375rem;

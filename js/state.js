@@ -36,6 +36,19 @@ export const FRAMES = [
   { key: 'phone', label: 'Phone' },
 ];
 
+// On a real phone (a window under 600px wide) the Frame is native: the site
+// fills the screen at real size, with no phone drawn inside the phone, and
+// Desktop can't be picked. The Combination then always says `phone`. The same
+// width is the breakpoint in styles/toolbar.css.
+export const NARROW_QUERY = '(max-width: 599px)';
+export const NATIVE_FRAME_LABEL = 'Phone (actual size)';
+const narrowMedia = typeof matchMedia === 'function' ? matchMedia(NARROW_QUERY) : null;
+
+/** True when the Frame is native (the window itself is phone-sized). */
+export function isNarrow() {
+  return !!narrowMedia?.matches;
+}
+
 export const DEFAULTS = {
   page: 'home',
   piece: PIECES[0].key,
@@ -138,6 +151,7 @@ let lastPiece = DEFAULTS.piece;
 
 export function current() {
   const s = parse(location.hash);
+  if (isNarrow()) s.frame = 'phone';
   if (s.page === 'piece') lastPiece = s.piece;
   else s.piece = lastPiece;
   return s;
@@ -154,7 +168,7 @@ export function go(patch = {}, { replace = false } = {}) {
   const next = href(patch);
   if (next === location.hash) return;
   if (replace) {
-    history.replaceState(null, '', next);
+    history.replaceState(history.state, '', next);
     notify();
   } else {
     location.hash = next;
@@ -176,6 +190,11 @@ export function detailLabel(s) {
   return FRAMES.find((f) => f.key === s.frame)?.label ?? FRAMES[0].label;
 }
 
+/** The Frame as the toolbar shows it now: "Phone (actual size)" on a real phone. */
+export function liveDetailLabel(s) {
+  return isNarrow() ? NATIVE_FRAME_LABEL : detailLabel(s);
+}
+
 /* ---------- Change notifications ---------- */
 
 const listeners = new Set();
@@ -188,13 +207,20 @@ function notify() {
   listeners.forEach((cb) => cb(s));
 }
 
-/** Rewrite the hash in its canonical form (old or partial links), without adding history. */
+/** Rewrite the hash in its canonical form (old or partial links), without adding history.
+ *  Keeps the entry's history.state (main.js keeps its scroll bookkeeping there). */
 function canonicalise() {
   const canonical = serialise(current());
-  if (canonical !== location.hash) history.replaceState(null, '', canonical);
+  if (canonical !== location.hash) history.replaceState(history.state, '', canonical);
 }
 
 window.addEventListener('hashchange', () => {
+  canonicalise();
+  notify();
+});
+
+// Turning a phone or resizing a window across 600px switches native Frame on or off.
+narrowMedia?.addEventListener('change', () => {
   canonicalise();
   notify();
 });

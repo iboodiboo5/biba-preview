@@ -21,6 +21,37 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Instrument+Serif:ital@0;1&display=swap">
 
+<!--
+  Preload every ES module up front, so the browser fetches them side by side
+  instead of discovering them one import at a time. Add a new module here.
+  The Page's own module (js/pages/<page>.js) is preloaded from the hash.
+-->
+<link rel="modulepreload" href="js/main.js">
+<link rel="modulepreload" href="js/state.js">
+<link rel="modulepreload" href="js/toolbar.js">
+<link rel="modulepreload" href="js/site.js">
+<link rel="modulepreload" href="js/favourites-view.js">
+<link rel="modulepreload" href="js/favourites.js">
+<link rel="modulepreload" href="js/shortcuts.js">
+<link rel="modulepreload" href="js/pages.js">
+<link rel="modulepreload" href="js/pieces.js">
+<link rel="modulepreload" href="js/brand.js">
+<link rel="modulepreload" href="js/images.js">
+<link rel="modulepreload" href="js/image-manifest.js">
+<link rel="modulepreload" href="js/wordmark.js">
+<link rel="modulepreload" href="js/ui.js">
+<link rel="modulepreload" href="js/bag-store.js">
+<link rel="modulepreload" href="js/size-chart.js">
+<script>
+  (() => {
+    const m = /^#?(?:page=)?(home|collection|piece|story|bag|help)\b/.exec(location.hash);
+    const l = document.createElement('link');
+    l.rel = 'modulepreload';
+    l.href = `js/pages/${m ? m[1] : 'home'}.js`;
+    document.head.append(l);
+  })();
+</script>
+
 <!-- Review tool (never styled by a Direction) -->
 <link rel="stylesheet" href="styles/toolbar.css">
 <link rel="stylesheet" href="styles/favourites.css">

@@ -15,8 +15,10 @@
   --pink-mist: #fce4e2;
   --butter-gingham: #f0eac3;
   --rose: #c67582; /* dusty rose */
-  --pink: #de5f77; /* logo pink: buttons, links, the star */
-  --pink-deep: #c84b64; /* pressed and hover state of the pink */
+  --pink: #de5f77; /* logo pink: the logo, the Anaar word, the star, big italic accents (not small text: 3.5:1 on white) */
+  --pink-deep: #b33c57; /* round 3: deep pink, for buttons and pink text (white on it 5.7:1; on white 5.7, butter 5.0, blush 4.7) */
+  --pink-deeper: #9a2f48; /* hover and pressed state of the deep pink */
+  --rose-ink: #9e4f5e; /* round 3: rose for small text (on white 5.6:1, butter 5.0, blush 4.6) */
   --ink: #2b1b20; /* warm near-black, pink-biased */
   --white: #ffffff;
 
@@ -35,14 +37,15 @@
   --c-surface: var(--white);
   --c-ink: var(--ink);
   --c-ink-soft: rgb(43 27 32 / 0.72);
-  --c-accent: var(--pink);
-  --c-eyebrow: var(--rose);
+  --c-accent: var(--pink-deep); /* pink text and links: passes AA at small sizes */
+  --c-logo: var(--pink); /* logo pink: the Anaar word, the star, big italic accents only */
+  --c-eyebrow: var(--rose-ink);
   --c-line: rgb(198 117 130 / 0.3);
   --c-media-bg: var(--pink-mist);
   --c-on-image: var(--white);
   --c-scrim: #2b1b20;
-  --c-btn: var(--pink);
-  --c-btn-hover: var(--pink-deep);
+  --c-btn: var(--pink-deep);
+  --c-btn-hover: var(--pink-deeper);
   --c-btn-ink: var(--white);
   --c-header: var(--white);
   --c-header-ink: var(--ink);
@@ -53,7 +56,7 @@
   --c-footer-ink: var(--ink);
   --c-footer-line: rgb(43 27 32 / 0.14);
   --c-menu: var(--white);
-  --field-bg: var(--butter);
+  --field-bg: var(--c-bg); /* round 3: sections stay on the white ground */
   --card-bg: transparent;
 
   /* Type */
@@ -73,11 +76,11 @@
   --title-tracking: 0;
   --fs-title: 1rem;
 
-  --fs-lede: 1.1875rem;
+  --fs-lede: 1.1875rem; /* 19px: the ~18-20px step (also --fs-h3) */
   --fs-body: 1rem;
   --body-weight: 400;
   --body-leading: 1.6;
-  --eyebrow-tracking: 0.16em;
+  --eyebrow-tracking: 0.14em;
   --ui-tracking: 0.08em;
   --ui-weight: 500;
 
@@ -91,9 +94,11 @@
 
 /* ---------- Fields ---------- */
 
+/* Round 3: white is the page ground and butter is the footer's alone, so a
+   plain .s-field is a white section. --soft (blush) is for one section per
+   Page at most; --gingham for one too. */
 :where(#site[data-dir='biba']) .s-field {
-  --c-surface: var(--butter);
-  --c-media-bg: var(--butter-gingham);
+  --c-surface: var(--c-bg);
 }
 :where(#site[data-dir='biba']) .s-field--soft {
   --field-bg: var(--pink-mist);
@@ -109,7 +114,7 @@
 /* ---------- Type ---------- */
 
 :where(#site[data-dir='biba']) .s-display em {
-  color: var(--pink);
+  color: var(--c-logo); /* large type: logo pink passes 3:1 */
 }
 :where(#site[data-dir='biba']) .s-price {
   letter-spacing: 0.02em;
@@ -141,7 +146,7 @@
 }
 :where(#site[data-dir='biba']) .s-link {
   font-weight: 600;
-  background-image: linear-gradient(var(--pink), var(--pink));
+  background-image: linear-gradient(var(--c-accent), var(--c-accent));
   background-size: 100% 1.5px;
 }
 :where(#site[data-dir='biba']) .s-link:hover {
@@ -154,14 +159,14 @@
 :where(#site[data-dir='biba']) .site-announce {
   background: var(--gingham-pink);
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
 }
 :where(#site[data-dir='biba']) .site-nav {
   letter-spacing: 0.1em;
 }
 :where(#site[data-dir='biba']) .site-nav__link::after {
   height: 1.5px;
-  background: var(--pink);
+  background: var(--c-accent);
 }
 :where(#site[data-dir='biba']) .site-footer__base {
   opacity: 0.7;

@@ -243,10 +243,43 @@ body {
   background: var(--rt-bg-2);
   box-shadow: inset 0 -1px 0 var(--rt-line);
 }
-/* No keyboard on touch screens: drop the key hint. */
+/* The pill's icon is for touch screens (below); elsewhere it reads "Show toolbar h". */
+.rt-show__icon {
+  display: none;
+}
+
+/* Touch screens: no keyboard, so no key hint, and the pill becomes a 44px round
+   button in the bottom-left corner. On the Pages with a bar along the bottom of
+   the screen (the Piece page's "Add to bag", the bag's "Checkout" and "Place
+   order") it sits above the bar, clear of its price and button. */
 @media (hover: none) {
   .rt-show kbd {
     display: none;
+  }
+  .rt-show {
+    left: max(12px, env(safe-area-inset-left));
+    right: auto;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 6px 20px -8px var(--rt-shadow);
+  }
+  :root:has(#site[data-page='piece'], #site[data-page='bag']) .rt-show {
+    bottom: calc(max(12px, env(safe-area-inset-bottom)) + 76px);
+  }
+  .rt-show__icon {
+    display: block;
+  }
+  .rt-show__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 
@@ -264,6 +297,21 @@ body {
 #rt-label {
   color: var(--rt-ink);
   font-weight: 500;
+}
+
+/* Text for screen readers only */
+.rt-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The Page dropdown is the phone toolbar's (below); wider windows have the tabs. */
+.rt-pagesel {
+  display: none;
 }
 
 /* ---------- Compact toolbar (narrow windows) ----------
@@ -415,4 +463,163 @@ body {
 }
 .rt-stage[data-frame='phone'] .site-scroll::-webkit-scrollbar {
   display: none;
+}
+
+/* ---------- Real phones (under 600px): one-row toolbar and native Frame ----------
+   The same width as NARROW_QUERY in js/state.js, which makes the Frame `phone`
+   there. The toolbar is one row of 44px controls: logo, the Page dropdown (Pieces
+   inside it), Name, ♡, Favourites, Hide. Pages tabs, the Piece picker, the Frame
+   group and the label line give way to it (the dropdown shows the Frame).
+
+   The Frame is native: no phone is drawn inside the phone. The site fills the
+   width, and the document itself scrolls (not .site-scroll), so the browser's
+   bars collapse and tapping the status bar scrolls to the top. The toolbar sits
+   in the flow above the site and scrolls away with it, which leaves the site's
+   own sticky header free to stick at the top of the screen. */
+
+@media (max-width: 599px) {
+  html,
+  body {
+    height: auto;
+    overflow: visible;
+  }
+
+  .rt {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px max(6px, env(safe-area-inset-right)) 4px max(6px, env(safe-area-inset-left));
+  }
+  .rt-row {
+    display: contents;
+  }
+  .rt-pages,
+  .rt-piece,
+  .rt-spacer,
+  .rt-label,
+  .rt-brand__sub,
+  .rt-brand__name,
+  .rt-group__title,
+  .rt-group--frame {
+    display: none;
+  }
+  .rt-brand {
+    order: 1;
+    flex: none;
+    height: 44px;
+    padding: 0 6px 0 4px;
+    margin: 0;
+    border: 0;
+  }
+  .rt-brand__logo--biba {
+    height: 22px;
+    margin: 0;
+  }
+  .rt-brand__logo {
+    width: 24px;
+    height: 24px;
+  }
+  .rt-pagesel {
+    order: 2;
+    display: block;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .rt-pagesel select {
+    appearance: none;
+    width: 100%;
+    height: 44px;
+    padding: 0 24px 0 11px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--rt-bg-2)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23e9e3dd' stroke-width='1.2'/%3E%3C/svg%3E")
+      no-repeat right 10px center;
+    color: var(--rt-ink);
+    font: 500 14px/1 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .rt-pagesel select:focus-visible {
+    outline: 1.5px solid var(--rt-accent);
+    outline-offset: 2px;
+  }
+  .rt-group--name {
+    order: 3;
+    flex: none;
+  }
+  .rt-seg {
+    padding: 0;
+  }
+  .rt-seg__opt,
+  .rt-row .rt-seg__opt {
+    height: 44px;
+    padding: 0 7px;
+    font-size: 13px;
+  }
+  .rt-actions {
+    order: 4;
+    flex: none;
+    gap: 2px;
+  }
+  .rt .rt-hide {
+    order: 5;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    justify-content: center;
+    box-shadow: none;
+  }
+
+  /* Native Frame: undo the stage and the drawn phone. */
+  .rt-stage[data-frame] {
+    position: relative;
+    inset: auto;
+    display: block;
+    padding: 0;
+    overflow: visible;
+    background: none;
+  }
+  .rt-stage[data-frame] .rt-device-slot,
+  .rt-stage[data-frame] .rt-device {
+    width: auto;
+    height: auto;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    transform: none;
+  }
+  .rt-stage[data-frame] #site {
+    width: auto;
+    height: auto;
+    min-height: 100svh;
+    border-radius: 0;
+    /* clip, not hidden: hidden would make #site a scroll box and stop sticky working */
+    overflow: clip;
+    --site-vh: 100svh;
+  }
+  .rt-stage[data-frame] .site-scroll {
+    position: relative;
+    inset: auto;
+    overflow: visible;
+    overscroll-behavior: auto;
+  }
+  /* Overlays (the phone menu) cover the screen, not the whole document. */
+  .rt-stage[data-frame] .site-layer {
+    position: fixed;
+    inset: 0;
+  }
+
+  /* While Favourites is open the toolbar stays on top of it. */
+  .rt-favs-open .rt {
+    position: fixed;
+    inset: 0 0 auto 0;
+  }
+  .rt-favs-open body {
+    overflow: hidden;
+  }
 }

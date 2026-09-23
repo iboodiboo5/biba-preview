@@ -1,4 +1,4 @@
-/* Home, round 2: the Cover banner (.home-l1__cover, a deck of slides that wipes
+/* Home, round 3: the Cover banner (.home-l1__cover, a deck of slides that wipes
    on tap) over one page body (__line, __drop, __made, __facts). Inner elements
    are named BEM-style from the Layout class; every rule starts with .home-l1.
    The "how it's made" stills are the shared .video-still (styles/components.css).
@@ -22,6 +22,7 @@
   overflow: hidden;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  touch-action: pan-y; /* sideways drags are swipes (home.js), vertical ones scroll */
 }
 
 /* Slides: stacked; only the current one (and the one it is wiping over) shows.
@@ -51,18 +52,40 @@
   visibility: visible;
 }
 .home-l1 .home-l1__panel {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+.home-l1 .home-l1__panel > picture {
+  display: block;
   height: 100%;
 }
-/* Crops keep the face below the overlay header: the front photo from near its
-   top, the Cover photographs (home-1..4, sky or wall above her) about a third down.
-   The detail is cropped from the yoke down anyway. */
-.home-l1 .home-l1__panel > img {
-  object-position: 50% 6%;
-}
-.home-l1 .home-l1__panel--detail > img {
+/* Cover photographs: each slide sets its own object-position (home.js COVERS)
+   so her head clears the header. Phones get the portrait crops, whose
+   headroom is built in. */
+.home-l1 .home-l1__slide--cover .home-l1__panel img {
   object-position: 50% 30%;
 }
-.home-l1 .home-l1__slide--cover .home-l1__panel > img {
+/* Piece slides: the photos start just under the overlay header, on a blurred
+   copy of themselves, so the model's head always clears the logo. The front
+   photo is framed from the top (per Piece in home.js); the detail from the yoke.
+   On Desktop the front sits on the right so the title lies over the detail,
+   never over her hem. */
+.home-l1 .home-l1__slide--piece .home-l1__panel > img {
+  position: absolute;
+  inset: auto 0 0;
+  height: calc(100% - var(--header-h) - 12px);
+}
+.home-l1 .home-l1__slide--piece .home-l1__panel > img.home-l1__soft {
+  inset: 0;
+  height: 100%;
+  filter: blur(22px) saturate(1.1);
+  transform: scale(1.15);
+}
+.home-l1 .home-l1__panel--front {
+  order: 2;
+}
+.home-l1 .home-l1__panel--detail > img {
   object-position: 50% 30%;
 }
 
@@ -112,8 +135,14 @@
   inset: 0;
   z-index: 3;
   pointer-events: none;
+  /* the gradient under the title: deep at the foot, gone by mid-height */
   background:
-    linear-gradient(to top, color-mix(in srgb, var(--c-scrim) 52%, transparent), transparent 58%),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--c-scrim) 62%, transparent),
+      color-mix(in srgb, var(--c-scrim) 34%, transparent) 26%,
+      transparent 52%
+    ),
     linear-gradient(to bottom, color-mix(in srgb, var(--c-scrim) 28%, transparent), transparent 22%);
 }
 
@@ -123,85 +152,68 @@
   z-index: 4;
   /* a soft shadow keeps the small caption legible over a bright wall or sky */
   text-shadow: 0 1px 14px color-mix(in srgb, var(--c-scrim) 40%, transparent);
-  padding-bottom: clamp(32px, 4.5cqi, 64px);
+  padding-bottom: clamp(28px, 4cqi, 56px);
+  pointer-events: none;
+}
+.home-l1 .home-l1__text > * {
+  pointer-events: auto;
 }
 
-/* The caption line: where you are in the deck, and the hint */
+/* The caption line (the banner's one tracked label): dashes for the slides,
+   then "<Piece> · tap for next" as one button */
 .home-l1 .home-l1__meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px 24px;
-  margin-bottom: clamp(18px, 2cqi, 28px);
+  gap: 12px 18px;
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: clamp(14px, 1.6cqi, 22px);
   font-family: var(--f-ui);
   font-size: var(--fs-eyebrow);
+  font-weight: 500;
   letter-spacing: var(--eyebrow-tracking);
   text-transform: uppercase;
   line-height: 1;
 }
-.home-l1 .home-l1__now {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 14px;
-  min-width: 0;
-}
 .home-l1 .home-l1__dots {
   display: flex;
+  flex: none;
   gap: 4px;
 }
 .home-l1 .home-l1__dots > span {
-  width: 16px;
+  width: 14px;
   height: 2px;
   background: currentColor;
-  opacity: 0.4;
+  opacity: 0.45;
   transition: opacity 0.4s ease, width 0.4s ease;
 }
 .home-l1 .home-l1__dots > span.is-on {
-  width: 28px;
+  width: 26px;
   opacity: 1;
-}
-.home-l1 .home-l1__count {
-  font-variant-numeric: tabular-nums;
-  opacity: 0.9;
-}
-.home-l1 .home-l1__name {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding-block: 4px;
-  background: linear-gradient(currentColor, currentColor) left bottom / 0 1px no-repeat;
-  transition: background-size 0.4s ease;
-}
-.home-l1 .home-l1__name:hover,
-.home-l1 .home-l1__name:focus-visible {
-  background-size: 100% 1px;
-}
-.home-l1 .home-l1__sold {
-  padding: 5px 8px 4px;
-  background: var(--c-bg);
-  color: var(--c-ink);
-}
-.home-l1 .home-l1__sold[hidden] {
-  display: none;
 }
 
 .home-l1 .home-l1__next {
-  flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px 9px 16px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 14px 0 16px;
   font: inherit;
   letter-spacing: inherit;
   text-transform: inherit;
   color: inherit;
-  background: color-mix(in srgb, var(--c-scrim) 18%, transparent);
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--c-scrim) 22%, transparent);
   border: var(--hairline) solid color-mix(in srgb, var(--c-on-image) 55%, transparent);
   border-radius: var(--radius-btn);
   cursor: pointer;
   transition: background 0.3s ease, color 0.3s ease;
+}
+.home-l1 .home-l1__label {
+  flex: 0 1 auto;
+  min-width: 3ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .home-l1 .home-l1__next:hover,
 .home-l1 .home-l1__next:focus-visible {
@@ -209,24 +221,28 @@
   color: var(--c-ink);
 }
 .home-l1 .home-l1__btn,
-.home-l1 .home-l1__sold,
 .home-l1 .home-l1__next:hover,
 .home-l1 .home-l1__next:focus-visible {
   text-shadow: none;
 }
 .home-l1 .home-l1__next:focus-visible,
-.home-l1 .home-l1__name:focus-visible,
 .home-l1 .home-l1__btn:focus-visible {
   outline: 2px solid var(--c-on-image);
   outline-offset: 3px;
+}
+.home-l1 .home-l1__hint {
+  flex: none;
+  opacity: 0.9;
 }
 .home-l1 .home-l1__hint--tap {
   display: none;
 }
 /* A small arrow that nudges forward now and then, so the photo reads as tappable */
 .home-l1 .home-l1__arrow {
+  flex: none;
   width: 14px;
   height: 1px;
+  margin-left: 10px;
   background: currentColor;
   position: relative;
   animation: home-l1-nudge 2.8s ease-in-out 1.2s infinite;
@@ -250,24 +266,27 @@
   90% { transform: translateX(0); }
 }
 
+/* The title: a size smaller than round 2, kept to the left so it sits beside
+   the model on Desktop rather than over her */
 .home-l1 .home-l1__title {
+  max-width: 9.5ch;
   font-family: var(--f-display);
   font-weight: 400;
-  font-size: clamp(3.6rem, 10cqi, 9.5rem);
-  line-height: 0.94;
+  font-size: clamp(3rem, 7cqi, 6.5rem);
+  line-height: 0.96;
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
 .home-l1 .home-l1__title em {
   color: var(--butter);
 }
+/* The sub-line, then the Shop button under it, all on the left with the title */
 .home-l1 .home-l1__row {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px 32px;
-  margin-top: clamp(20px, 2.4cqi, 36px);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: clamp(16px, 2cqi, 28px);
 }
 .home-l1 .home-l1__sub {
   max-width: 30rem;
@@ -394,8 +413,14 @@
   max-width: calc(1080px + 2 * var(--gutter));
   text-align: center;
 }
-.home-l1 .home-l1__facts-list .s-eyebrow {
-  margin-bottom: 8px;
+/* one plain line per fact, no tracked labels (the section's one label budget
+   is unspent here on purpose) */
+.home-l1 .home-l1__fact {
+  margin-bottom: 6px;
+  font-family: var(--f-ui);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  line-height: 1.35;
 }
 .home-l1 .home-l1__facts-list .s-meta {
   max-width: 24rem;
@@ -422,11 +447,22 @@
   .home-l1 .home-l1__hint--click {
     display: none;
   }
-  .home-l1 .home-l1__count {
-    display: none;
+  /* the dashes above the "<Piece> · tap for next" button, so the name never
+     gets squeezed out */
+  .home-l1 .home-l1__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
   .home-l1 .home-l1__next {
-    padding: 9px 12px 8px 14px;
+    padding: 0 12px 0 14px;
+  }
+  .home-l1 .home-l1__title {
+    font-size: clamp(2.5rem, 12.5cqi, 3.25rem);
+  }
+  /* At phone width the sub-line goes: the photo and the Shop button carry it */
+  .home-l1 .home-l1__sub {
+    display: none;
   }
   .home-l1 .home-l1__row {
     margin-top: 16px;
@@ -440,10 +476,6 @@
   }
   .home-l1 .home-l1__tiles {
     gap: 10px;
-  }
-  /* Three small tiles: the play button is enough */
-  .home-l1 .home-l1__still .video-still__soon {
-    display: none;
   }
   .home-l1 .home-l1__step {
     flex-direction: column;

@@ -1,8 +1,10 @@
-/* Piece. Owned by ticket 05.
+/* Piece. Owned by ticket 05 (round 2) and ticket 04 (round 3).
    Scope every rule to .p-piece or a .piece-lN class (N = Layout number).
    Use Direction tokens (var(--c-ink), var(--f-display), ...); see docs/conventions.md.
    Sizing: @container site (max-width: ...) and cqi units, never @media or vw.
-   The size chart table itself is shared: .size-chart in styles/components.css. */
+   The size chart table itself is shared: .size-chart in styles/components.css.
+   One small tracked label per section: "Size" in the buying column (the facts
+   table's labels are the allowed exception). */
 
 /* =====================================================================
    Shared parts: breadcrumb, buy form, size chart panel, facts
@@ -11,21 +13,23 @@
 .p-piece {
   --piece-print-size: 150px;
   --piece-chip-h: 46px;
+  --piece-tap: 44px;
 }
 
 .p-piece .piece-crumbs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 10px;
+  align-items: center;
+  gap: 0 8px;
   font-family: var(--f-ui);
-  font-size: 0.65625rem;
-  font-weight: 400;
-  letter-spacing: var(--ui-tracking);
-  text-transform: uppercase;
+  font-size: var(--fs-meta);
   line-height: 1.6;
   color: var(--c-ink-soft);
 }
 .p-piece .piece-crumbs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--piece-tap);
   transition: color 0.3s ease;
 }
 .p-piece .piece-crumbs a:hover {
@@ -43,12 +47,11 @@
 }
 .p-piece .piece-buy__head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
-.p-piece .piece-buy__label,
-.p-piece .piece-buy__guide {
+.p-piece .piece-buy__label {
   font-family: var(--f-ui);
   font-size: var(--fs-eyebrow);
   font-weight: 500;
@@ -60,9 +63,15 @@
   color: var(--c-accent);
 }
 .p-piece .piece-buy__guide {
-  padding: 4px 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--piece-tap);
+  padding: 0;
   background: none;
   border: 0;
+  font-family: var(--f-ui);
+  font-size: var(--fs-meta);
+  font-weight: 500;
   color: var(--c-accent);
   cursor: pointer;
   text-decoration: underline;
@@ -82,6 +91,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
+  scroll-margin-block: calc(var(--header-h) + 24px) 120px;
 }
 .p-piece .piece-size {
   position: relative;
@@ -104,12 +114,11 @@
   border: var(--hairline) solid var(--c-line);
   border-radius: var(--radius-btn);
   font-family: var(--f-ui);
-  font-size: var(--fs-ui);
-  font-weight: var(--ui-weight);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: var(--fs-meta);
+  font-weight: 500;
+  letter-spacing: 0.08em;
   color: var(--c-ink);
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .p-piece .piece-size:hover span {
   border-color: var(--c-ink);
@@ -127,66 +136,60 @@
 .p-piece .piece-size:has(input:disabled) {
   cursor: not-allowed;
 }
+/* A sold-out Piece's sizes are simply unavailable: greyed, never struck through */
 .p-piece .piece-size input:disabled + span {
   color: var(--c-ink-soft);
   border-color: var(--c-line);
-  text-decoration: line-through;
-  text-decoration-color: var(--c-line);
-  opacity: 0.6;
-}
-.p-piece .piece-buy.is-asking .piece-size span {
-  border-color: var(--c-accent);
+  opacity: 0.55;
 }
 
-/* The size chart, folded open under the size buttons */
+/* No size chosen: the buttons are outlined and the error sits right under them */
+.p-piece .piece-buy.is-asking .piece-size span {
+  border-color: var(--c-accent);
+  box-shadow: 0 0 0 1px var(--c-accent);
+}
+.p-piece .piece-buy__error {
+  margin-top: -2px;
+  font-family: var(--f-ui);
+  font-size: var(--fs-meta);
+  font-weight: 500;
+  color: var(--c-accent);
+}
+.p-piece .piece-buy__error[hidden] {
+  display: none;
+}
+
+/* The size chart, folded open under the size buttons. The "Size chart" button is its one close control. */
 .p-piece .piece-l1__chart {
   display: grid;
   gap: 12px;
-  padding: 18px 16px 16px;
+  padding: 16px;
   background: var(--c-media-bg);
   animation: piece-l1-chart-in 0.35s ease;
 }
 .p-piece .piece-l1__chart[hidden] {
   display: none;
 }
-.p-piece .piece-l1__chart-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
 .p-piece .piece-l1__chart-title {
   font-family: var(--f-ui);
-  font-size: var(--fs-eyebrow);
+  font-size: var(--fs-meta);
   font-weight: 600;
-  letter-spacing: var(--eyebrow-tracking);
-  text-transform: uppercase;
-}
-.p-piece .piece-l1__chart-title .s-meta {
-  margin-left: 6px;
-  font-size: var(--fs-eyebrow);
-  letter-spacing: 0.02em;
-  text-transform: none;
-}
-.p-piece .piece-l1__chart-close {
-  padding: 4px 0;
-  background: none;
-  border: 0;
-  font-family: var(--f-ui);
-  font-size: var(--fs-eyebrow);
-  font-weight: 500;
-  letter-spacing: var(--eyebrow-tracking);
-  text-transform: uppercase;
-  color: var(--c-ink);
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-.p-piece .piece-l1__chart-close:hover {
-  color: var(--c-accent);
 }
 .p-piece .piece-l1__chart .size-chart__table tbody tr:last-child > * {
   border-bottom: 0;
+}
+.p-piece .piece-l1__chart-groups > * {
+  padding-block: 0 4px;
+  border-bottom: 0;
+  font-family: var(--f-ui);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--c-ink);
+}
+.p-piece .piece-l1__chart-groups th + th {
+  border-left: var(--hairline) solid var(--c-line);
 }
 .p-piece .piece-l1__chart-note {
   font-size: 0.75rem;
@@ -198,6 +201,35 @@
   }
 }
 
+/* Fit: the model's size (a placeholder) and the between-sizes link */
+.p-piece .piece-l1__fit {
+  display: grid;
+  gap: 0;
+}
+.p-piece .piece-l1__placeholder {
+  margin-left: 4px;
+  padding: 1px 6px;
+  border: var(--hairline) dashed var(--c-line);
+  font-size: 0.75rem;
+  color: var(--c-ink-soft);
+}
+.p-piece .piece-l1__fit-ask {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  min-height: var(--piece-tap);
+  font-family: var(--f-ui);
+  font-size: var(--fs-meta);
+  font-weight: 500;
+  color: var(--c-accent);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+.p-piece .piece-l1__fit-ask:hover {
+  color: var(--c-btn-hover);
+}
+
 /* The dupatta add-on: a small switch */
 .p-piece .piece-buy__dupatta {
   position: relative;
@@ -205,7 +237,6 @@
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   gap: 14px;
-  margin-top: 10px;
   padding: 16px 0;
   border-block: var(--hairline) solid var(--c-line);
   cursor: pointer;
@@ -254,10 +285,6 @@
   font-size: 0.9375rem;
   line-height: 1.4;
 }
-.p-piece .piece-buy__dupatta.is-disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
 
 /* The total, following the dupatta choice */
 .p-piece .piece-buy__total {
@@ -266,16 +293,12 @@
   justify-content: space-between;
   gap: 12px;
   font-family: var(--f-ui);
-  font-size: var(--fs-eyebrow);
+  font-size: 0.9375rem;
   font-weight: 600;
-  letter-spacing: var(--eyebrow-tracking);
-  text-transform: uppercase;
 }
 .p-piece .piece-buy__total .s-meta {
   margin-left: 6px;
-  font-size: var(--fs-eyebrow);
-  letter-spacing: 0.02em;
-  text-transform: none;
+  font-weight: 400;
 }
 .p-piece .piece-buy__total .s-price {
   font-size: 1rem;
@@ -299,38 +322,71 @@
   cursor: not-allowed;
 }
 
-/* What happened: a prompt, a confirmation, or the sold-out note */
-.p-piece .piece-buy__status:empty {
-  display: none;
+/* ---------- The "added" toast, just under the header ---------- */
+
+/* A zero-height dock that sticks under the header for the whole page, so the
+   toast is on screen wherever Add to bag was pressed (no position: fixed). */
+.piece-l1__toast-dock {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 25;
+  height: 0;
 }
-.p-piece .piece-buy__ask {
-  color: var(--c-accent);
-}
-.p-piece .piece-l1__added {
+.piece-l1__toast {
+  position: absolute;
+  top: 12px;
+  right: max(var(--gutter), calc((100cqi - var(--maxw)) / 2));
   display: grid;
-  gap: 4px;
-  padding: 14px 16px;
-  background: var(--c-media-bg);
-  border-left: 2px solid var(--c-accent);
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px 12px;
+  width: min(420px, calc(100cqi - 2 * var(--gutter)));
+  padding: 14px 8px 14px 18px;
+  background: var(--c-bg);
+  border: var(--hairline) solid var(--c-line);
+  border-left: 3px solid var(--c-accent);
+  box-shadow: 0 12px 32px -12px color-mix(in srgb, var(--c-scrim) 35%, transparent);
   animation: piece-l1-chart-in 0.35s ease;
 }
-.p-piece .piece-l1__added-head {
+.piece-l1__toast-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.piece-l1__toast-head {
   font-family: var(--f-ui);
-  font-size: var(--fs-eyebrow);
-  font-weight: 600;
-  letter-spacing: var(--eyebrow-tracking);
-  text-transform: uppercase;
-  color: var(--c-accent);
-}
-.p-piece .piece-l1__added-line {
   font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--c-ink);
 }
-.p-piece .piece-l1__added-foot {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 4px;
+.piece-l1__toast-line {
+  font-size: var(--fs-meta);
+  line-height: 1.45;
+}
+.piece-l1__toast .piece-l1__toast-view {
+  min-height: var(--piece-tap);
+  padding-inline: 1.4em;
+  white-space: nowrap;
+}
+.piece-l1__toast-close {
+  display: grid;
+  place-items: center;
+  width: var(--piece-tap);
+  height: var(--piece-tap);
+  padding: 0;
+  background: none;
+  border: 0;
+  font-size: 1.375rem;
+  line-height: 1;
+  color: var(--c-ink-soft);
+  cursor: pointer;
+}
+.piece-l1__toast-close:hover {
+  color: var(--c-ink);
+}
+
+.p-piece .piece-buy__note {
+  margin-top: 2px;
 }
 
 /* ---------- Facts ---------- */
@@ -348,6 +404,7 @@
 .p-piece .piece-l1__facts dt {
   font-family: var(--f-ui);
   font-size: var(--fs-eyebrow);
+  font-weight: 500;
   letter-spacing: var(--eyebrow-tracking);
   text-transform: uppercase;
   line-height: 2;
@@ -362,7 +419,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .p-piece .piece-l1__chart,
-  .p-piece .piece-l1__added {
+  .p-piece .piece-l1__toast {
     animation: none;
   }
   .p-piece .piece-buy__switch,
@@ -405,6 +462,10 @@
   background: var(--piece-print) center / var(--piece-print-size) auto repeat, var(--c-media-bg);
   border-radius: var(--radius-media);
 }
+/* Dots are for the phone's swipe row only */
+.piece-l1__dots {
+  display: none;
+}
 
 .piece-l1__panel {
   position: sticky;
@@ -416,7 +477,7 @@
 .piece-l1__titles {
   display: grid;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 4px;
 }
 .piece-l1__name {
   font-size: min(var(--fs-display-l), 6.2cqi);
@@ -428,7 +489,7 @@
   gap: 8px 14px;
 }
 .piece-l1__price {
-  font-size: 1rem;
+  font-size: 1.0625rem;
 }
 .piece-l1__sold {
   display: inline-flex;
@@ -439,40 +500,39 @@
   background: var(--c-ink);
   color: var(--c-bg);
   font-family: var(--f-ui);
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  letter-spacing: var(--eyebrow-tracking);
-  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 .piece-l1__desc {
   max-width: 26rem;
 }
 .piece-l1__kind {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 10px;
-  margin-top: -6px;
-}
-.piece-l1__kind-tag {
-  font-family: var(--f-ui);
-  font-size: var(--fs-eyebrow);
-  font-weight: 600;
-  letter-spacing: var(--eyebrow-tracking);
-  text-transform: uppercase;
-  color: var(--c-eyebrow);
+  margin-top: -8px;
 }
 .piece-l1 .piece-l1__facts {
   margin-top: 8px;
 }
 
 .piece-l1__more {
-  padding-block: var(--section-y);
+  padding-block: 0 var(--section-y);
+}
+.piece-l1__more .sec-head .s-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--piece-tap);
+  padding-bottom: 0;
+  background-position: 0 calc(100% - 10px);
 }
 .piece-l1__grid-more {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--grid-gap-y) var(--grid-gap-x);
+}
+
+/* The phone's buy bar: hidden on desktop */
+.piece-l1__bar {
+  display: none;
 }
 
 /* =====================================================================
@@ -506,34 +566,138 @@
     gap: 12px;
   }
 
-  /* L1: the gallery becomes a swipeable row */
+  /* L1: the gallery is a full-width 4:5 swipe row with dots; name and price follow straight after */
   .piece-l1__main {
     padding-top: 0;
   }
   .piece-l1__grid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 28px;
+    gap: 8px;
+  }
+  .piece-l1__pics {
+    margin-inline: calc(-1 * var(--gutter));
   }
   .piece-l1__gallery {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
-    margin-inline: calc(-1 * var(--gutter));
-    padding-inline: var(--gutter);
+    gap: 0;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--gutter);
     scrollbar-width: none;
   }
+  .piece-l1__gallery::-webkit-scrollbar {
+    display: none;
+  }
   .piece-l1__gallery > * {
-    flex: 0 0 84%;
+    flex: 0 0 100%;
     scroll-snap-align: start;
   }
+  .piece-l1__gallery .s-media,
+  .piece-l1__cloth-tile {
+    aspect-ratio: 4 / 5;
+  }
+  .piece-l1__gallery .s-media > img {
+    object-position: 50% 20%;
+  }
+  /* The dots say which picture this is; the captions would push the name down */
+  .piece-l1__gallery .s-caption {
+    display: none;
+  }
+  .piece-l1__dots {
+    display: flex;
+    justify-content: center;
+    height: 28px;
+  }
+  .piece-l1__dot {
+    position: relative;
+    width: var(--piece-tap);
+    height: var(--piece-tap);
+    margin-top: -8px;
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .piece-l1__dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--c-line);
+    translate: -50% -50%;
+    transition: background 0.3s ease, scale 0.3s ease;
+  }
+  .piece-l1__dot[aria-current='true']::after {
+    background: var(--c-accent);
+    scale: 1.2;
+  }
+  .piece-l1__dot:focus-visible {
+    outline: 1px solid var(--c-accent);
+    outline-offset: -8px;
+  }
+
   .piece-l1__panel {
     position: static;
+    gap: 16px;
+    padding-top: 0;
+  }
+  .piece-l1__panel .piece-crumbs {
+    display: none;
+  }
+  .piece-l1__titles {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 4px 16px;
+    margin-top: 0;
+  }
+  .piece-l1__titles > :not(.piece-l1__name, .piece-l1__price-row) {
+    grid-column: 1 / -1;
   }
   .piece-l1__name {
-    font-size: var(--fs-display-l);
+    font-size: clamp(2rem, 9cqi, 2.6rem);
+  }
+  .piece-l1__price-row {
+    justify-content: flex-end;
+  }
+
+  /* The bar at the foot of the screen does the adding on the phone */
+  .p-piece .piece-buy:not(.is-sold-out) .piece-buy__add {
+    display: none;
+  }
+
+  .piece-l1__bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    display: block;
+    padding: 10px var(--gutter) max(10px, env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--c-bg) 94%, transparent);
+    border-top: var(--hairline) solid var(--c-line);
+    backdrop-filter: blur(8px);
+  }
+  .piece-l1__bar-add {
+    width: 100%;
+    min-height: 50px;
+  }
+
+  .piece-l1__toast {
+    right: var(--gutter);
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 12px 4px 12px 14px;
+  }
+  .piece-l1__toast-view {
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: start;
+  }
+  .piece-l1__toast-close {
+    grid-row: 1;
+    grid-column: 2;
+    align-self: start;
+    margin-top: -8px;
   }
 
   .piece-l1__grid-more {

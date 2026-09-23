@@ -42,7 +42,7 @@
 .story-l1__split-text > * + * {
   margin-top: 20px;
 }
-.story-l1__split-text .s-link {
+.story-l1__split-text .s-btn {
   margin-top: 32px;
 }
 
@@ -51,6 +51,11 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--grid-gap-x);
+}
+/* One small tracked label per section: the print captions are plain */
+.story-l1__prints .s-caption {
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 /* Watch us make it: three video stills on the page's one gingham field */
@@ -102,28 +107,11 @@
 .story-l1__for-grid {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  align-items: center;
+  align-items: start;
   gap: 40px clamp(40px, 7cqi, 128px);
 }
 .story-l1__for-text > * + * {
   margin-top: 20px;
-}
-.story-l1__facts {
-  display: grid;
-  margin-top: 32px !important;
-  border-top: var(--hairline) solid var(--c-line);
-}
-.story-l1__facts > div {
-  display: grid;
-  grid-template-columns: 10em minmax(0, 1fr);
-  align-items: baseline;
-  gap: 16px;
-  padding-block: 12px;
-  border-bottom: var(--hairline) solid var(--c-line);
-}
-.story-l1__facts dd {
-  margin: 0;
-  color: var(--c-ink);
 }
 
 /* Follow along: placeholder slots for the brand's handles */
@@ -135,9 +123,6 @@
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 32px clamp(32px, 5cqi, 80px);
-}
-.story-l1__follow-inner > div > * + * {
-  margin-top: 12px;
 }
 .story-l1__social {
   display: flex;
@@ -192,15 +177,27 @@
     text-align: left;
     padding: 28px 20px;
   }
+  /* The stills become a swipeable row of about 260px cards, edge to edge */
   .story-l1__reels {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 32px;
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: min(260px, 72cqi);
+    gap: 12px;
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+    scroll-padding-inline: var(--gutter);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .story-l1__reels::-webkit-scrollbar {
+    display: none;
+  }
+  .story-l1__reel {
+    scroll-snap-align: start;
   }
   .story-l1__still.s-media--portrait {
     aspect-ratio: 4 / 5;
-  }
-  .story-l1__facts > div {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 4px;
   }
 }

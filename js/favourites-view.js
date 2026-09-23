@@ -8,12 +8,21 @@ import { href, go, current, label, detailLabel, effectiveLayout } from './state.
 const HEART =
   '<svg class="rt-fav__icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 20.3s-7.6-4.6-9.2-9.4C1.7 7.4 3.9 4 7.4 4c2 0 3.4 1.1 4.6 2.7C13.2 5.1 14.6 4 16.6 4c3.5 0 5.7 3.4 4.6 6.9-1.6 4.8-9.2 9.4-9.2 9.4z"/></svg>';
 
+// The Favourites link's icon, shown on phones where the word doesn't fit.
+const LIST =
+  '<svg class="rt-favs-link__icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 6.5h14M5 12h14M5 17.5h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+
+// Published inside claude.ai the Favourites are shared; anywhere else (GitHub
+// Pages, a local server) they stay in this browser, and the view says so.
+const SHARED_HOST = /(^|\.)(claude\.ai|claudeusercontent\.com)$/.test(location.hostname);
+const LOCAL_NOTE = 'Favourites are saved on this device only.';
+
 const actions = document.getElementById('rt-actions');
 actions.innerHTML = `
   <button class="rt-fav" type="button" data-fav="toggle" aria-pressed="false" title="Save this Combination as a Favourite">
     ${HEART}<span class="rt-fav__text">Favourite</span>
   </button>
-  <a class="rt-favs-link" data-fav="view" href="#">Favourites <span class="rt-count" data-fav="count">0</span></a>
+  <a class="rt-favs-link" data-fav="view" href="#">${LIST}<span class="rt-favs-link__text">Favourites</span> <span class="rt-count" data-fav="count">0</span></a>
 `;
 const favBtn = actions.querySelector('[data-fav="toggle"]');
 const favText = favBtn.querySelector('.rt-fav__text');
@@ -185,7 +194,7 @@ function renderView() {
 
   viewPart('back').href = href({ view: 'site' });
   viewPart('total').textContent = favs.length ? String(favs.length) : '';
-  viewPart('note').textContent = info.ready ? info.note : 'Connecting…';
+  viewPart('note').textContent = !SHARED_HOST ? LOCAL_NOTE : info.ready ? info.note : 'Connecting…';
   const err = viewPart('error');
   err.hidden = !info.error;
   err.textContent = info.error;

@@ -321,3 +321,63 @@
 .rt-favs-open .rt-stage {
   visibility: hidden;
 }
+
+/* ---------- Phones and touch screens (ticket r3-02) ---------- */
+
+.rt-favs-link__icon {
+  display: none;
+}
+
+/* The one-row phone toolbar: ♡ and Favourites are 44px icon buttons (the count stays). */
+@media (max-width: 599px) {
+  .rt .rt-fav,
+  .rt .rt-favs-link {
+    height: 44px;
+    min-width: 44px;
+    padding: 0 8px;
+    justify-content: center;
+    gap: 4px;
+  }
+  .rt-fav__icon {
+    width: 16px;
+    height: 16px;
+  }
+  .rt-favs-link__icon {
+    display: block;
+    flex: none;
+  }
+  /* The count rides on the icon's corner so the button stays 44px wide. */
+  .rt .rt-favs-link {
+    position: relative;
+    width: 44px;
+    padding: 0;
+  }
+  .rt-favs-link .rt-count {
+    position: absolute;
+    top: 5px;
+    right: 3px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    font-size: 9px;
+  }
+  .rt-favs-link__text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .rt-favs__inner {
+    padding: 28px 16px 48px;
+  }
+}
+
+/* Touch screens have no keyboard: no key hints. */
+@media (hover: none) {
+  .rt-favs kbd,
+  .rt-favs__keys {
+    display: none;
+  }
+}

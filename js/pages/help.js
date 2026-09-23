@@ -6,6 +6,10 @@
 // disagrees with the Piece page or checkout. No returns promise, no custom
 // measurements, no appointments.
 //
+// Round 3 (ticket 06): Help is one of the places the facts are kept (the
+// "at a glance" strip). White intro, the size chart on the page's one blush
+// field, plain (untracked) labels for the glance and the FAQ groups.
+//
 // The size chart table comes from the shared renderer in js/size-chart.js (the
 // same one the Piece page uses); Help adds its own in/cm switch around it.
 
@@ -67,19 +71,19 @@ const FAQ = [
     key: 'exchanges',
     group: 'Exchanges',
     items: [
-      ['Can I return a Piece?', EXCHANGES.text],
+      ['Can I return a piece?', EXCHANGES.text],
       ['How do I ask for an exchange?', 'Message us on WhatsApp with your order number and what is wrong, and we will arrange it.'],
     ],
   },
   {
     key: 'pieces',
-    group: 'The Pieces',
+    group: 'The pieces',
     items: [
       [
         'Is the dupatta included?',
-        `No. Each Piece is a two-piece: a short kurta and shalwar in ${FABRIC.kurta.toLowerCase()}. You can add the matching ${FABRIC.dupatta.toLowerCase()} dupatta on the Piece page.`,
+        `No. Each piece is a two-piece: a short kurta and shalwar in ${FABRIC.kurta.toLowerCase()}. You can add the matching ${FABRIC.dupatta.toLowerCase()} dupatta on the piece's page.`,
       ],
-      ['Do you offer custom sizing?', `No. Every Piece comes in ${sizeRange()}. Check the size chart before you order.`],
+      ['Do you offer custom sizing?', `No. Every piece comes in ${sizeRange()}. Check the size chart before you order.`],
       ['What if I am between sizes?', 'Check the size chart, or message us on WhatsApp and we will help you choose.'],
       ['Will a sold-out design come back?', 'Every design is made in limited numbers, so once it sells out it is sold out. We may restock if lots of you ask.'],
       ['How do I look after it?', `${CARE.text}${CARE.placeholder ? ' (Placeholder care note.)' : ''}`],
@@ -111,7 +115,7 @@ const clientCare = {
     const WHATSAPP = whatsappLink(ctx.brand.hello('I have a question.'));
 
     return html`
-      <section class="help-l1__intro s-field">
+      <section class="help-l1__intro">
         <div class="wrap help-l1__intro-grid">
           <div class="help-l1__intro-text">
             <h1 class="s-display s-display--xl help-l1__title">Help</h1>
@@ -130,7 +134,7 @@ const clientCare = {
           <ul class="help-l1__glance-list">
             ${GLANCE.map(
               ([label, text]) => html`<li>
-                <p class="s-eyebrow">${label}</p>
+                <p class="help-l1__glance-label">${label}</p>
                 <p class="help-l1__glance-text">${text}</p>
               </li>`,
             )}
@@ -142,7 +146,7 @@ const clientCare = {
         <div class="wrap help-l1__sizes-grid">
           <div class="help-l1__sizes-main">
             ${sectionHead({ title: 'Size chart' })}
-            <p class="s-body">Every Piece comes in ${sizeRange()}. There is no custom sizing, so check your measurements against the chart before you order.</p>
+            <p class="s-body">Every piece comes in ${sizeRange()}. There is no custom sizing, so check your measurements against the chart before you order.</p>
             ${helpSizeChart()}
           </div>
           <aside class="help-l1__measure">
@@ -165,7 +169,7 @@ const clientCare = {
           ${sectionHead({ title: 'Questions and answers', center: true })}
           ${FAQ.map(
             ({ key, group, items }) => html`<div class="help-l1__faq-group" data-topic="${key}">
-              <h3 class="s-eyebrow help-l1__faq-head">${group}</h3>
+              <h3 class="help-l1__faq-head">${group}</h3>
               ${items.map(
                 ([q, a], i) => html`<details class="help-l1__qa"${i === 0 && key === FAQ[0].key ? ' open' : ''}>
                   <summary><span>${q}</span>${plus}</summary>
