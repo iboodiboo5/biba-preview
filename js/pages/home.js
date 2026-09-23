@@ -12,16 +12,14 @@
 // (styles/pages/home.css).
 // Each Layout: { name, render(ctx) => html, header?: 'overlay', mount? }
 
-import { html, esc, pad2, pieceCard, videoStill, MAKING } from '../ui.js';
-import { resolve } from '../images.js';
+import { html, esc, pad2, pieceCard, sectionHead, videoStill, MAKING, PHONE_WIDTH } from '../ui.js';
+import { resolve, source, webpFor } from '../images.js';
 import { FABRIC, DISPATCH, DELIVERY, EXCHANGES, sizeRange } from '../pieces.js';
 
 // Placeholder collection title and line (spec: Copy).
 const TITLE = 'Easy, <em>breezy</em> cotton';
 const SUB = 'Short kurtas with farshi or slim shalwar, in hand-painted prints.';
 
-// The banner's phone width (the Phone frame or a real phone): portrait crops.
-const PHONE = 760;
 // A sideways drag longer than this (px) is a swipe.
 const SWIPE = 40;
 
@@ -41,14 +39,7 @@ const COVERS = [
 
 // Piece slides: the photos start under the header, on a soft copy of
 // themselves, so her head always clears the logo. The front photo is framed
-// from the top, centred on each model.
-const PIECE_FRAMING = {
-  posy: '46% 0%',
-  buttercup: '50% 0%',
-  pistachio: '52% 0%',
-  lilac: '50% 0%',
-  apricot: '52% 0%',
-};
+// from the top, centred on each model (each Piece's `framing`, js/pieces.js).
 
 // One entry per slide: what the caption names and where its link goes.
 // Sold-out Pieces never appear in the rotation.
@@ -69,13 +60,24 @@ function coverSlides(ctx) {
   ].filter((s) => !s.sold);
 }
 
-// A Cover photograph: the landscape file, with the portrait crop for phones
-// when it exists. mountCover switches the <source> on in the Phone frame.
-function coverPicture(ctx, c, loading) {
-  const land = ctx.img(c.image, { alt: c.alt, position: c.position, loading });
-  const port = c.portrait ? resolve(c.portrait) : null;
-  if (!port || port.standin) return land;
-  return `<picture><source media="(max-width: ${PHONE}px)" srcset="${port.src}" data-cover-portrait>${land}</picture>`;
+// A Cover photograph: the landscape file, with the portrait crop's WebPs for
+// phones when it exists. mountCover switches the <source> on in the Phone frame.
+// A waiting slide's <source> waits with its <img> (js/images.js), so only the
+// first slide loads. The first slide's image is the one the first screen waits
+// on: it is fetched first, over a blurred low-resolution copy (desktop only).
+function coverPicture(ctx, c, first) {
+  const loading = first ? 'eager' : 'lazy';
+  const land = ctx.img(c.image, { alt: c.alt, position: c.position, loading, priority: first ? 'high' : '' });
+  const port = c.portrait ? source(c.portrait, `(max-width: ${PHONE_WIDTH}px)`) : '';
+  if (!port) return land;
+  return `<picture>${port.replace('<source ', '<source data-cover-portrait ')}${land}</picture>`;
+}
+
+/** The blurred stand-in under the first Cover photograph while it loads (desktop). */
+function coverPlaceholder(c) {
+  const small = webpFor(resolve(c.image).src);
+  // Absolute, because a url() inside a custom property resolves against the stylesheet that uses it.
+  return `--home-l1-ph: url('${new URL(small, document.baseURI).href}');`;
 }
 
 function slide(ctx, s, i, total) {
@@ -84,11 +86,12 @@ function slide(ctx, s, i, total) {
   const attrs = `class="home-l1__slide home-l1__slide--${kind}${current ? ' is-current' : ''}" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${total}: ${esc(s.name)}" data-name="${esc(s.name)}" data-href="${s.href}"${current ? '' : ' aria-hidden="true"'}`;
   const loading = current ? 'eager' : 'lazy';
   if (s.cover) {
-    return `<div ${attrs}><div class="s-media home-l1__panel">${coverPicture(ctx, s.cover, loading)}</div></div>`;
+    const ph = current ? ` style="${coverPlaceholder(s.cover)}"` : '';
+    return `<div ${attrs}><div class="s-media home-l1__panel${current ? ' home-l1__panel--first' : ''}"${ph}>${coverPicture(ctx, s.cover, current)}</div></div>`;
   }
   const soft = (k) => ctx.pieceImg(s.piece, k, { alt: '', cls: 'home-l1__soft', loading: 'lazy' });
   return `<div ${attrs}>
-      <div class="s-media home-l1__panel home-l1__panel--front">${soft('front')}${ctx.pieceImg(s.piece, 'front', { loading, position: PIECE_FRAMING[s.piece.key] })}</div>
+      <div class="s-media home-l1__panel home-l1__panel--front">${soft('front')}${ctx.pieceImg(s.piece, 'front', { loading, position: s.piece.framing })}</div>
       <div class="s-media home-l1__panel home-l1__panel--detail">${soft('detail')}${ctx.pieceImg(s.piece, 'detail', { loading: 'lazy' })}</div>
     </div>`;
 }
@@ -136,7 +139,7 @@ function mountCover(root) {
   // <source> media query (which reads the window) would pick the landscape
   // file: follow the banner's own width instead.
   const fit = () => {
-    const media = cover.clientWidth <= PHONE ? 'all' : `(max-width: ${PHONE}px)`;
+    const media = cover.clientWidth <= PHONE_WIDTH ? 'all' : `(max-width: ${PHONE_WIDTH}px)`;
     for (const s of portraits) if (s.media !== media) s.media = media;
   };
   fit();
@@ -236,12 +239,14 @@ function body(ctx) {
 
     <section class="home-l1__drop">
       <div class="wrap">
-        <header class="home-l1__drop-head">
-          <h2 class="s-display s-display--m">${ctx.drop.name}</h2>
-          <a class="s-link" href="${ctx.href({ page: 'collection' })}">View all</a>
-        </header>
+        ${sectionHead({
+          title: ctx.drop.name,
+          link: `<a class="s-link" href="${ctx.href({ page: 'collection' })}">View all</a>`,
+          motif: 'daisy',
+          cls: 'home-l1__drop-head',
+        })}
         <div class="home-l1__drop-grid">
-          ${pieces.map((p, i) => pieceCard(p, ctx, { eager: i < 2 }))}
+          ${pieces.map((p) => pieceCard(p, ctx))}
         </div>
       </div>
     </section>

@@ -243,15 +243,22 @@ body {
   background: var(--rt-bg-2);
   box-shadow: inset 0 -1px 0 var(--rt-line);
 }
+/* In the native phone Frame the site's bottom bar (components.css .bottom-bar:
+   the Piece page's "Add to bag", the bag's "Checkout" / "Place order") shares the
+   foot of the screen with the pill. While one shows, ui.js watchBottomBar() sets
+   --bottom-bar-h on :root and the pill sits above it; otherwise it is unset. */
+@media (max-width: 599px) {
+  :root .rt-show {
+    bottom: calc(max(12px, env(safe-area-inset-bottom)) + var(--bottom-bar-h, 0px));
+  }
+}
 /* The pill's icon is for touch screens (below); elsewhere it reads "Show toolbar h". */
 .rt-show__icon {
   display: none;
 }
 
 /* Touch screens: no keyboard, so no key hint, and the pill becomes a 44px round
-   button in the bottom-left corner. On the Pages with a bar along the bottom of
-   the screen (the Piece page's "Add to bag", the bag's "Checkout" and "Place
-   order") it sits above the bar, clear of its price and button. */
+   button in the bottom-left corner. */
 @media (hover: none) {
   .rt-show kbd {
     display: none;
@@ -266,9 +273,6 @@ body {
     justify-content: center;
     border-radius: 50%;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 6px 20px -8px var(--rt-shadow);
-  }
-  :root:has(#site[data-page='piece'], #site[data-page='bag']) .rt-show {
-    bottom: calc(max(12px, env(safe-area-inset-bottom)) + 76px);
   }
   .rt-show__icon {
     display: block;

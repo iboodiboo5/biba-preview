@@ -313,36 +313,8 @@
   color: var(--c-ink-soft);
 }
 
-/* Inline errors: ink text after a pink mark, and a pink line under the field */
-.bag-l1__error {
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-  font-family: var(--f-ui);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--c-ink);
-}
-.bag-l1__error::before {
-  content: '!';
-  flex: none;
-  display: inline-grid;
-  place-items: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--c-btn);
-  color: var(--c-btn-ink);
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1;
-  translate: 0 2px;
-}
-.bag-l1__error[hidden] {
-  display: none;
-}
-p.bag-l1__error {
+/* Inline errors (the shared .field-error, ui.js) and a pink line under the field */
+.bag-l1__block > .field-error {
   margin-top: 14px;
 }
 .bag-l1__field.is-invalid input,
@@ -739,17 +711,8 @@ p.bag-l1__error {
   padding-bottom: 0;
 }
 .bag-l1__motif {
-  width: 96px;
-  height: 96px;
+  --motif-h: 96px;
   margin-bottom: 20px;
-}
-.bag-l1__motif:empty {
-  display: none;
-}
-.bag-l1__motif img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
 }
 .bag-l1__empty-line,
 .bag-l1__lede {
@@ -778,11 +741,6 @@ p.bag-l1__error {
   color: var(--c-eyebrow);
 }
 
-/* ---------- Phone bar: Checkout, then Place order, always in reach ---------- */
-
-.bag-l1__bar {
-  display: none;
-}
 
 /* ---------- Confirmation ---------- */
 
@@ -933,27 +891,7 @@ p.bag-l1__error {
   .bag-l1__grid {
     padding-top: 8px;
   }
-  /* The bar stays at the bottom of the screen, above the home indicator */
-  .bag-l1__bar {
-    position: sticky;
-    bottom: 0;
-    z-index: 5;
-    display: block;
-    padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom, 0px));
-    background: var(--c-bg);
-    border-top: var(--hairline) solid var(--c-line);
-    transition: translate 0.3s ease, opacity 0.3s ease, visibility 0.3s;
-  }
-  .bag-l1__bar.is-away {
-    translate: 0 100%;
-    opacity: 0;
-    visibility: hidden;
-  }
-  .bag-l1__bar-btn {
-    width: 100%;
-    min-height: 52px;
-  }
-  .bag-l1__bar-btn span[aria-hidden] {
+  .bag-l1__bar .bottom-bar__btn span[aria-hidden] {
     opacity: 0.7;
   }
   .bag-l1__item {

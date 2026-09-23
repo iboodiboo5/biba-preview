@@ -54,7 +54,9 @@
 /* Sold out (one treatment, round 3): the "Sold out" tag on the picture, the
    picture a little quieter, and "Sold out" in place of the price. Never a
    strike-through, so it never reads as a sale. */
-.piece-card__flag {
+/* Sold out (ui.js soldTag, SOLD_PRICE): the tag on the picture, and "Sold out" in
+   place of the price. The piece card and the Piece page share it. */
+.sold-tag {
   position: absolute;
   top: 12px;
   left: 12px;
@@ -76,7 +78,7 @@
   color: var(--c-ink-soft);
   text-decoration: none;
 }
-.piece-card__price--sold {
+.sold-price {
   font-size: var(--fs-eyebrow);
   font-weight: 500;
   letter-spacing: var(--eyebrow-tracking);
@@ -187,6 +189,20 @@
   line-height: 1.3;
   color: var(--c-ink-soft);
 }
+/* The group row: "Body" over bust, waist and hips, "Finished garment" over the lengths */
+.size-chart .size-chart__table .size-chart__groups > * {
+  padding-block: 0 4px;
+  border-bottom: 0;
+  font-family: var(--f-ui);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--c-ink);
+}
+.size-chart .size-chart__table .size-chart__groups th + th {
+  border-left: var(--hairline) solid var(--c-line);
+}
 .size-chart__table tbody th {
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -199,6 +215,71 @@
 }
 .size-chart__table tbody tr.is-marked th {
   color: var(--c-accent);
+}
+
+/* ---------- Field errors (ui.js fieldError): ink text after a pink "!" ---------- */
+
+.field-error {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-family: var(--f-ui);
+  font-size: var(--fs-ui);
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--c-ink);
+}
+.field-error::before {
+  content: '!';
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--c-btn);
+  color: var(--c-btn-ink);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  line-height: 1;
+  translate: 0 2px;
+}
+.field-error[hidden] {
+  display: none;
+}
+
+/* ---------- The phone's bottom bar (ui.js watchBottomBar) ----------
+   One full-width button that stays at the foot of the screen on the phone
+   (the Piece page's "Add to bag", the bag's "Checkout" / "Place order"); not
+   shown at wider sizes. `.is-away` slides it out of the way. */
+
+.bottom-bar {
+  display: none;
+}
+@container site (max-width: 760px) {
+  .bottom-bar {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    display: block;
+    padding: 10px var(--gutter) max(10px, env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--c-bg) 94%, transparent);
+    border-top: var(--hairline) solid var(--c-line);
+    backdrop-filter: blur(8px);
+    transition: translate 0.3s ease, opacity 0.3s ease, visibility 0.3s;
+  }
+  .bottom-bar[hidden] {
+    display: none;
+  }
+  .bottom-bar.is-away {
+    translate: 0 100%;
+    opacity: 0;
+    visibility: hidden;
+  }
+  .bottom-bar__btn {
+    width: 100%;
+    min-height: 52px;
+  }
 }
 
 /* ---------- Motifs (js/ui.js motif()): small hand-painted details ---------- */

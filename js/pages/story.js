@@ -11,22 +11,16 @@
 //
 // Round 3 (ticket 06): no facts table (the facts live on Home, the Piece page
 // and Help), fewer small labels, a shop button after the founder, and the two
-// real print swatches drawn from her full-resolution artwork (PRINT_ART below).
+// real print swatches drawn from her full-resolution artwork (printArt() in
+// js/images.js). Two small motifs close sections: a star on "Painted by hand",
+// a bow on "Come and say hello".
 //
 // Images (ticket 03): story-1 the Prints on the worktable, story-2 the rail
 // (hands only), story-3 two friends out and about, all landscape 3:2. The
 // "how it's made" steps and their video stills are shared with Home (ui.js).
 
-import { html, esc, frame, media, pad2, videoStill, MAKING } from '../ui.js';
-
-// Her two real prints at full resolution (cut from docs/client/round-2/
-// from-client/), sharper than the 600px piece squares. Shared-file note for
-// ticket 07: this belongs in js/images.js as a resolver kind; until then the
-// fallback is the piece's own square, so nothing 404s.
-const PRINT_ART = {
-  posy: 'assets/prints/print-posy.jpg',
-  buttercup: 'assets/prints/print-buttercup.jpg',
-};
+import { html, frame, media, motif, pad2, sectionHead, videoStill, MAKING } from '../ui.js';
+import { printArt } from '../images.js';
 
 /* ---------- Layout 1 · Our founder: short sections, one idea each ---------- */
 
@@ -37,13 +31,7 @@ const founder = {
     const prints = pieces.filter((p) => p.real);
     const still = (key, alt, ratio, loading = 'lazy') =>
       media(ctx.img(key, { alt, loading }), { ratio });
-    const printArt = (p) => {
-      const alt = `The ${p.name} print, hand-painted`;
-      const src = PRINT_ART[p.key];
-      if (!src) return ctx.pieceImg(p, 'print', { alt });
-      const { src: fallback } = ctx.pieceSrc(p, 'print');
-      return `<img src="${src}" data-fallback="${esc(fallback)}" alt="${esc(alt)}" loading="lazy" decoding="async">`;
-    };
+    const art = (p) => printArt(p, { alt: `The ${p.name} print, hand-painted`, sizes: 'auto, (max-width: 600px) 50vw, 25vw' });
 
     return html`
       <section class="story-l1__intro">
@@ -72,14 +60,14 @@ const founder = {
         <div class="wrap story-l1__split-grid">
           <div class="story-l1__prints">
             ${prints.map((p) =>
-              frame(media(printArt(p), { ratio: 'portrait' }), {
+              frame(media(art(p), { ratio: 'portrait' }), {
                 caption: p.groundLabel,
               }),
             )}
           </div>
           <div class="story-l1__split-text">
             <p class="s-eyebrow">The prints</p>
-            <h2 class="s-display s-display--l">Painted by hand</h2>
+            <h2 class="s-display s-display--l">Painted by hand${motif('star', 'sec-head__motif')}</h2>
             <p class="s-body">Our founder hand-paints the prints herself: pastel gingham, florals and the odd bow. Each one becomes a short kurta and shalwar in pure cotton.</p>
           </div>
         </div>
@@ -116,7 +104,7 @@ const founder = {
 
       <section class="story-l1__follow s-field s-field--soft">
         <div class="wrap story-l1__follow-inner">
-          <h2 class="s-display s-display--m">Come and say hello</h2>
+          ${sectionHead({ title: 'Come and say hello', motif: 'bow', cls: 'story-l1__follow-head' })}
           <p class="story-l1__social"><span class="story-l1__social-name">Instagram</span> <span class="s-meta">soon</span></p>
           <a class="s-btn" href="${ctx.href({ page: 'collection' })}">Shop the collection</a>
         </div>

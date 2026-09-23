@@ -282,7 +282,10 @@
 }
 
 .s-link {
-  display: inline-block;
+  /* A 44px tap target (--tap): the room is above the words, so the underline stays under them */
+  display: inline-flex;
+  align-items: flex-end;
+  min-height: var(--tap);
   padding-bottom: 5px;
   font-family: var(--f-ui);
   font-size: var(--fs-ui);
@@ -534,6 +537,7 @@
 .wm {
   display: inline-flex;
   align-items: center;
+  min-height: var(--tap);
   gap: 0.55em;
   line-height: 1;
   color: inherit;
@@ -663,6 +667,8 @@
 .site-footer__links a {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-width: var(--tap);
   min-height: var(--tap);
 }
 .site-footer a {

@@ -60,6 +60,23 @@
   display: block;
   height: 100%;
 }
+/* The first Cover photograph arrives over a blurred low-resolution copy of
+   itself (home.js coverPlaceholder), so a slow connection never shows a blank
+   banner. Desktop only: a phone's portrait file is small and comes quickly. */
+@container site (min-width: 761px) {
+  .home-l1 .home-l1__panel--first::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--home-l1-ph) 50% 40% / cover no-repeat;
+    filter: blur(18px);
+    transform: scale(1.08);
+  }
+  .home-l1 .home-l1__panel--first > picture,
+  .home-l1 .home-l1__panel--first > img {
+    position: relative;
+  }
+}
 /* Cover photographs: each slide sets its own object-position (home.js COVERS)
    so her head clears the header. Phones get the portrait crops, whose
    headroom is built in. */

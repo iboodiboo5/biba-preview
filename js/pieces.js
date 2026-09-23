@@ -34,14 +34,17 @@ export function sizeRange() {
 }
 
 // Body measurements in inches; the lengths are the finished garment. Placeholder figures.
+// Each column: [key, label, group], the group being 'body' or 'garment' (the chart's
+// "Body" / "Finished garment" row, GROUPS).
 export const SIZE_CHART = {
   placeholder: true,
+  groups: { body: 'Body', garment: 'Finished garment' },
   columns: [
-    ['bust', 'Bust'],
-    ['waist', 'Waist'],
-    ['hips', 'Hips'],
-    ['kurta', 'Kurta length'],
-    ['shalwar', 'Shalwar length'],
+    ['bust', 'Bust', 'body'],
+    ['waist', 'Waist', 'body'],
+    ['hips', 'Hips', 'body'],
+    ['kurta', 'Kurta length', 'garment'],
+    ['shalwar', 'Shalwar length', 'garment'],
   ],
   rows: {
     XS: { bust: 32, waist: 26, hips: 35, kurta: 34, shalwar: 37 },
@@ -111,7 +114,8 @@ export const PAYMENT = [
     regions: ['pakistan'],
     only: 'Pakistan only',
   },
-  { key: 'bank', label: 'Bank transfer', note: 'Transfer the total, then send us the receipt on WhatsApp' },
+  // The receipt and the order number are asked for on the confirmation, once the order exists.
+  { key: 'bank', label: 'Bank transfer', note: "Transfer the total to the account below; we'll confirm on WhatsApp" },
 ];
 
 /** The payment methods offered for a delivery region ('' before a country is chosen: all of them). */
@@ -126,13 +130,16 @@ export function paymentText({ capital = false } = {}) {
 }
 
 // Placeholder: the client will supply the real account.
+/** "1 piece", "3 pieces": every count of pieces in the copy. */
+export const pieceCount = (n) => `${n} ${n === 1 ? 'piece' : 'pieces'}`;
+
 export const BANK_DETAILS = {
   placeholder: true,
   bank: 'Bank name (placeholder)',
   title: 'Account title (placeholder)',
   account: '0000 0000 0000 0000',
   iban: 'PK00 XXXX 0000 0000 0000 0000',
-  note: 'Please send your transfer receipt on WhatsApp with your order number. We dispatch once it clears.',
+  note: 'Once your order is placed, send the transfer receipt on WhatsApp with your order number. We dispatch once it clears.',
 };
 
 export const EXCHANGES = {
@@ -142,9 +149,12 @@ export const EXCHANGES = {
 
 /* ---------- The six Pieces ---------- */
 
+// `framing`: where the front photo is anchored when Home's banner shows it under the
+// header (object-position): from the top, centred on the model.
 export const PIECES = [
   {
     key: 'posy',
+    framing: '46% 0%',
     name: 'Posy',
     real: true, // the client's own Print
     price: 14500,
@@ -158,6 +168,7 @@ export const PIECES = [
   },
   {
     key: 'buttercup',
+    framing: '50% 0%',
     name: 'Buttercup',
     real: true, // the client's own Print
     price: 15500,
@@ -171,6 +182,7 @@ export const PIECES = [
   },
   {
     key: 'pistachio',
+    framing: '52% 0%',
     name: 'Pistachio',
     real: false, // stand-in until the next designs are ready
     price: 13500,
@@ -184,6 +196,7 @@ export const PIECES = [
   },
   {
     key: 'lilac',
+    framing: '50% 0%',
     name: 'Lilac',
     real: false,
     price: 14500,
@@ -197,6 +210,7 @@ export const PIECES = [
   },
   {
     key: 'bluebell',
+    framing: '50% 0%',
     name: 'Bluebell',
     real: false,
     price: 13500,
@@ -210,6 +224,7 @@ export const PIECES = [
   },
   {
     key: 'apricot',
+    framing: '52% 0%',
     name: 'Apricot',
     real: false,
     price: 15000,

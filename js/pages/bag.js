@@ -16,9 +16,11 @@
 // the pieces are in view, then "Place order · PKR x" once the form is, and it
 // steps aside when the real Place order button is on screen.
 
-import { html, esc, media } from '../ui.js';
 import {
-  formatPKR, pieceByKey, pieceContents, whatsappLink, deliveryFee, paymentFor,
+  html, esc, media, motif, fieldError, showFieldError, siteScroller, siteViewport, onSiteScroll, watchBottomBar,
+} from '../ui.js';
+import {
+  formatPKR, pieceByKey, pieceContents, whatsappLink, deliveryFee, paymentFor, pieceCount,
   DELIVERY, DISPATCH, PAYMENT, BANK_DETAILS, EXCHANGES, FABRIC,
 } from '../pieces.js';
 import { MAX_QTY } from '../bag-store.js';
@@ -30,12 +32,9 @@ const EXAMPLE_BAG = [
   ['buttercup', 'S', 1, false],
 ];
 
-// The hand-painted bow from round 3's motifs (ticket 01). It shows only once the
-// file has loaded, so the empty bag and the confirmation work without it.
-// TODO: read it from js/images.js once that exports the motifs.
-const MOTIF = 'assets/motifs/bow.webp';
-
 const REGIONS = DELIVERY.regions;
+// A line's thumbnail is 112px wide at most (--bag-thumb in styles/pages/bag.css).
+const THUMB_SIZES = '112px';
 const regionPrice = (r) => `${formatPKR(r.fee)}${r.usd ? ` (about USD ${r.usd})` : ''}`;
 
 const CITIES = [
@@ -49,12 +48,8 @@ const receiptLink = (ctx, number) =>
 
 // The placed order, kept while the reviewer stays on this Page.
 let order = null;
-// Whether the motif file loaded (null until the first try).
-let motifReady = null;
 
 /* ---------- Helpers ---------- */
-
-const pieceWord = (n) => (n === 1 ? 'piece' : 'pieces');
 
 function lines(ctx) {
   return ctx.bag.list().map((item, index) => {
@@ -80,7 +75,8 @@ function blockHead(num, title, aside = '') {
   </header>`;
 }
 
-const motifSlot = () => '<div class="bag-l1__motif" data-motif aria-hidden="true"></div>';
+// The hand-painted bow over the empty bag and the confirmation.
+const bow = () => motif('bow', 'bag-l1__motif');
 
 /* ---------- Line items ---------- */
 
@@ -91,7 +87,7 @@ function itemsHtml(ctx, items) {
   return items.map(
     (l) => html`<li class="bag-l1__item">
       <a class="bag-l1__thumb" href="${ctx.href({ page: 'piece', piece: l.piece.key })}" aria-label="${l.piece.name}">
-        ${media(ctx.pieceImg(l.piece, 'front', { alt: `${l.piece.name}, front`, loading: 'eager' }), { ratio: 'portrait' })}
+        ${media(ctx.pieceImg(l.piece, 'front', { alt: `${l.piece.name}, front`, loading: 'eager', sizes: THUMB_SIZES }), { ratio: 'portrait' })}
       </a>
       <div class="bag-l1__item-text">
         <p class="bag-l1__item-name s-title">
@@ -125,7 +121,7 @@ function summaryHtml(ctx, region) {
   return html`
     <h2 class="bag-l1__summary-title">Order summary</h2>
     <dl class="bag-l1__sums">
-      <div><dt>Subtotal <span class="bag-l1__sums-meta">· ${t.count} ${pieceWord(t.count)}</span></dt><dd class="s-price">${formatPKR(t.subtotal)}</dd></div>
+      <div><dt>Subtotal <span class="bag-l1__sums-meta">· ${pieceCount(t.count)}</span></dt><dd class="s-price">${formatPKR(t.subtotal)}</dd></div>
       <div data-delivery-line>
         <dt>Delivery${r ? ` <span class="bag-l1__sums-meta">· ${r.label}</span>` : ''}</dt>
         <dd class="${r ? 's-price' : 'bag-l1__pending'}">${r ? regionPrice(r) : 'Choose your country below'}</dd>
@@ -145,7 +141,7 @@ function field(label, input, { name, full = false, optional = false } = {}) {
   return html`<label class="bag-l1__field${full ? ' bag-l1__field--full' : ''}" data-field="${name}">
     <span class="bag-l1__label">${label}${optional && ' <span class="bag-l1__optional">optional</span>'}</span>
     ${input}
-    <span class="bag-l1__error" id="bag-err-${name}" data-error-for="${name}" hidden></span>
+    ${fieldError({ id: `bag-err-${name}`, forName: name, tag: 'span' })}
   </label>`;
 }
 
@@ -251,7 +247,7 @@ function checkoutView(ctx) {
   const t = totals(ctx);
   return html`
     <header class="wrap bag-l1__head">
-      <h1 class="bag-l1__title">Your bag <span class="bag-l1__count" data-bag-count-label>${t.count} ${pieceWord(t.count)}</span></h1>
+      <h1 class="bag-l1__title">Your bag <span class="bag-l1__count" data-bag-count-label>${pieceCount(t.count)}</span></h1>
     </header>
     ${stepsHtml('bag-l1__steps--strip')}
 
@@ -273,7 +269,7 @@ function checkoutView(ctx) {
               <legend class="bag-l1__label">Where are we delivering to?</legend>
               ${Object.values(REGIONS).map((r) => option('ship', r.key, r.label, r.note, regionPrice(r)))}
             </fieldset>
-            <p class="bag-l1__error" data-error-for="ship" role="alert" hidden></p>
+            ${fieldError({ forName: 'ship', alert: true })}
             <p class="bag-l1__fine s-meta">Delivery charges are placeholders for now.</p>
 
             <p class="bag-l1__label bag-l1__sub">Delivery details</p>
@@ -288,10 +284,9 @@ function checkoutView(ctx) {
             </fieldset>
             <p class="bag-l1__fine s-meta" data-pay-first>Choose your country first: how you can pay depends on it.</p>
             <p class="bag-l1__fine s-meta" data-pay-abroad hidden>Cash on delivery is for Pakistan only, so orders outside Pakistan are paid by bank transfer.</p>
-            <p class="bag-l1__error" data-error-for="pay" role="alert" hidden></p>
+            ${fieldError({ forName: 'pay', alert: true })}
 
             <div class="bag-l1__panel" data-pay-panel="bank">
-              <p class="s-body">Transfer the total to this account once you have placed your order.</p>
               ${bankHtml(ctx)}
             </div>
           </section>
@@ -313,8 +308,8 @@ function checkoutView(ctx) {
         </form>
     </div>
 
-    <div class="bag-l1__bar" data-bag-bar>
-      <button class="s-btn bag-l1__bar-btn" type="button" data-bar-action>
+    <div class="bottom-bar bag-l1__bar" data-bag-bar>
+      <button class="s-btn bottom-bar__btn" type="button" data-bar-action>
         <span data-bar-label>Checkout</span><span aria-hidden="true">·</span><span data-bar-total>${formatPKR(t.total)}</span>
       </button>
     </div>`;
@@ -323,7 +318,7 @@ function checkoutView(ctx) {
 function emptyView(ctx) {
   return html`
     <section class="wrap bag-l1__empty">
-      ${motifSlot()}
+      ${bow()}
       <h1 class="s-display s-display--m bag-l1__empty-title">Your bag is empty</h1>
       <p class="s-body bag-l1__empty-line">Nothing in here yet. The first pieces are waiting in the collection.</p>
       <div class="bag-l1__empty-actions">
@@ -345,7 +340,7 @@ function confirmationView(ctx, o) {
   ];
   return html`
     <section class="wrap bag-l1__done-head">
-      ${motifSlot()}
+      ${bow()}
       <p class="bag-l1__order-no">Order no. ${o.number}</p>
       <h1 class="s-display s-display--m bag-l1__empty-title">${first ? `Thank you, ${esc(first)}` : 'Thank you'}</h1>
       <p class="s-lede bag-l1__lede">${
@@ -368,12 +363,12 @@ function confirmationView(ctx, o) {
 
       <div class="bag-l1__receipt-grid">
         <section>
-          ${blockHead('', 'Your pieces', `${t.count} ${pieceWord(t.count)}`)}
+          ${blockHead('', 'Your pieces', pieceCount(t.count))}
           <ul class="bag-l1__items bag-l1__items--receipt">
             ${o.items.map(
               (l) => html`<li class="bag-l1__item">
                 <a class="bag-l1__thumb" href="${ctx.href({ page: 'piece', piece: l.piece.key })}" aria-label="${l.piece.name}">
-                  ${media(ctx.pieceImg(l.piece, 'front', { alt: `${l.piece.name}, front`, loading: 'eager' }), { ratio: 'portrait' })}
+                  ${media(ctx.pieceImg(l.piece, 'front', { alt: `${l.piece.name}, front`, loading: 'eager', sizes: THUMB_SIZES }), { ratio: 'portrait' })}
                 </a>
                 <div class="bag-l1__item-text">
                   <p class="bag-l1__item-name s-title">${l.piece.name}</p>
@@ -422,6 +417,241 @@ function view(ctx, kind) {
   return checkoutView(ctx);
 }
 
+/* ---------- Behaviour ----------
+   mount() hands one checkout object (`c`) to the named parts below: the totals,
+   the inline errors and Place order's check, the country and payment choices,
+   where the shopper is (the current step and the phone bar), and the repaint
+   when the bag changes. */
+
+/** The live checkout on the page: its root, ctx, and the form's current answers. */
+function checkoutFor(root, ctx) {
+  const form = () => root.querySelector('[data-bag-form]');
+  return {
+    root,
+    ctx,
+    form,
+    ship: () => form()?.elements.ship?.value ?? '',
+    pay: () => form()?.elements.pay?.value ?? '',
+    unBar: () => {},
+  };
+}
+
+/* ----- Totals: the summary, the Place order button and the phone bar ----- */
+
+function repaintTotals(c) {
+  const region = c.ship();
+  const t = totals(c.ctx, region);
+  c.root.querySelector('[data-bag-summary]').innerHTML = summaryHtml(c.ctx, region);
+  c.root.querySelectorAll('[data-submit-total], [data-bar-total]').forEach((n) => (n.textContent = formatPKR(t.total)));
+}
+
+/* ----- Inline errors and Place order's check ----- */
+
+function showError(c, name, message) {
+  const f = c.form();
+  showFieldError(f.querySelector(`[data-error-for="${name}"]`), message, f.querySelectorAll(`[name="${name}"]`));
+  f.querySelector(`[data-field="${name}"]`)?.classList.toggle('is-invalid', !!message);
+}
+
+function checkField(c, name) {
+  const node = c.form().elements.namedItem(name);
+  if (!node || !RULES[name]) return '';
+  const message = RULES[name](node.value.trim(), c.ship());
+  showError(c, name, message);
+  return message;
+}
+
+/** Everything Place order needs, in page order. Returns the names that failed. */
+function validate(c) {
+  const failed = [];
+  const region = REGIONS[c.ship()];
+  showError(c, 'ship', region ? '' : 'Choose where we are delivering to.');
+  if (!region) failed.push('ship');
+  for (const name of Object.keys(RULES)) if (checkField(c, name)) failed.push(name);
+  const noPay = region && !c.pay();
+  showError(c, 'pay', noPay ? 'Choose how you would like to pay.' : '');
+  if (noPay) failed.push('pay');
+  return failed;
+}
+
+/** The note by Place order says how many details are still missing, or goes away. */
+function sayMissing(c, failed) {
+  const alert = c.root.querySelector('[data-form-alert]');
+  const n = failed.length;
+  alert.hidden = !n;
+  alert.textContent = n ? `${n === 1 ? 'One detail is' : `${n} details are`} missing. ${n === 1 ? 'It is' : 'They are'} marked above.` : '';
+}
+
+/** After a first try at Place order, keep the errors up to date. */
+const recheck = (c) => c.form()?.dataset.tried && sayMissing(c, validate(c));
+
+/* ----- Country reshapes the address fields and the payment choices ----- */
+
+const KEEP = ['name', 'phone', 'email', 'address'];
+
+function repaintDetails(c) {
+  const box = c.root.querySelector('[data-bag-details]');
+  const kept = {};
+  box.querySelectorAll('input').forEach((f) => KEEP.includes(f.name) && (kept[f.name] = f.value));
+  box.innerHTML = detailsHtml(c.ship());
+  box.querySelectorAll('input').forEach((f) => kept[f.name] && (f.value = kept[f.name]));
+  // After a first try, keep showing what is still missing.
+  if (c.form().dataset.tried) Object.keys(RULES).forEach((name) => checkField(c, name));
+}
+
+/** Nothing is offered before a country; then only that country's methods, chosen
+ *  for the shopper only when there is just one. */
+function syncPayment(c) {
+  const f = c.form();
+  const region = c.ship();
+  const offered = paymentFor(region).map((m) => m.key);
+  f.querySelector('[data-field="pay"]').disabled = !region;
+  f.querySelectorAll('[name="pay"]').forEach((input) => {
+    const on = offered.includes(input.value);
+    input.disabled = !on;
+    input.closest('[data-option]').hidden = !on;
+    if (!on) input.checked = false;
+  });
+  if (region && offered.length === 1) f.querySelector(`[name="pay"][value="${offered[0]}"]`).checked = true;
+  f.dataset.pay = c.pay();
+  c.root.querySelector('[data-pay-first]').hidden = !!region;
+  c.root.querySelector('[data-pay-abroad]').hidden = !region || offered.length === PAYMENT.length;
+  if (c.pay()) showError(c, 'pay', '');
+}
+
+/* ----- Where the shopper is: the current step and the phone bar ----- */
+
+function track(c) {
+  if (c.root.dataset.view !== 'checkout') return;
+  const v = siteViewport();
+  const h = v.bottom - v.top;
+  const sections = [...c.root.querySelectorAll('[data-checkout-step]')];
+  let currentId = sections[0]?.id;
+  sections.forEach((s) => {
+    if (s.getBoundingClientRect().top - v.top < h * 0.45) currentId = s.id;
+  });
+  c.root.querySelectorAll('[data-goto]').forEach((b) => {
+    const on = b.dataset.goto === currentId;
+    b.classList.toggle('is-current', on);
+    if (on) b.setAttribute('aria-current', 'step');
+    else b.removeAttribute('aria-current');
+  });
+
+  // The bar reads "Checkout" over the pieces, "Place order" once the form is in
+  // view, and steps aside while the real Place order button is on screen.
+  const bar = c.root.querySelector('[data-bag-bar]');
+  const country = c.root.querySelector('#bag-country');
+  const submit = c.root.querySelector('[data-submit]');
+  if (!bar || !country || !submit) return;
+  const inForm = country.getBoundingClientRect().top - v.top < h * 0.6;
+  const s = submit.getBoundingClientRect();
+  bar.dataset.mode = inForm ? 'place' : 'checkout';
+  bar.querySelector('[data-bar-label]').textContent = inForm ? 'Place order' : 'Checkout';
+  bar.classList.toggle('is-away', s.top < v.bottom && s.bottom > v.top);
+}
+
+/* ----- Repaint when the bag changes ----- */
+
+function paint(c) {
+  const kind = viewKind(c.ctx);
+  if (kind !== c.root.dataset.view) {
+    c.root.dataset.view = kind;
+    c.root.innerHTML = view(c.ctx, kind);
+    siteScroller()?.scrollTo({ top: 0 });
+    watchBar(c);
+    track(c);
+    return;
+  }
+  if (kind !== 'checkout') return;
+  c.root.querySelector('[data-bag-items]').innerHTML = itemsHtml(c.ctx, lines(c.ctx)).join('');
+  c.root.querySelector('[data-bag-count-label]').textContent = pieceCount(c.ctx.bag.count());
+  repaintTotals(c);
+}
+
+/** The phone bar publishes its height for the review toolbar while it shows (ui.js). */
+function watchBar(c) {
+  c.unBar();
+  c.unBar = watchBottomBar(c.root.querySelector('[data-bag-bar]'));
+}
+
+/* ----- Events ----- */
+
+const scrollToId = (c, id) => c.root.querySelector(`#${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+function onClick(c, e) {
+  const t = e.target;
+  const qtyBtn = t.closest('[data-qty]');
+  if (qtyBtn) {
+    const i = +qtyBtn.dataset.qty;
+    const line = c.ctx.bag.list()[i];
+    if (line) c.ctx.bag.setQty(i, line.qty + +qtyBtn.dataset.step);
+  } else if (t.closest('[data-remove]')) {
+    c.ctx.bag.remove(+t.closest('[data-remove]').dataset.remove);
+  } else if (t.closest('[data-goto]')) {
+    scrollToId(c, t.closest('[data-goto]').dataset.goto);
+  } else if (t.closest('[data-fill-example]')) {
+    EXAMPLE_BAG.forEach(([piece, size, qty, dupatta]) => c.ctx.bag.add(piece, size, qty, dupatta));
+  } else if (t.closest('[data-bar-action]')) {
+    if (t.closest('[data-bag-bar]').dataset.mode === 'place') c.form().requestSubmit();
+    else scrollToId(c, 'bag-country');
+  } else if (t.closest('[data-new-order]')) {
+    order = null;
+  }
+}
+
+function onChange(c, e) {
+  if (e.target.name === 'ship') {
+    showError(c, 'ship', '');
+    repaintDetails(c);
+    syncPayment(c);
+    repaintTotals(c);
+  } else if (e.target.name === 'pay') {
+    c.form().dataset.pay = e.target.value;
+    showError(c, 'pay', '');
+  }
+  recheck(c);
+}
+
+/** Once a field has shown an error, it clears as soon as the value is fine. */
+function onInput(c, e) {
+  const name = e.target.name;
+  if (RULES[name] && c.form()?.querySelector(`[data-field="${name}"].is-invalid`)) recheck(c);
+}
+
+const ERROR_ORDER = ['ship', 'name', 'phone', 'address', 'country', 'city', 'pay'];
+
+/** A demo: nothing is sent anywhere. The fields are checked first. */
+function onSubmit(c, e) {
+  if (!e.target.matches('[data-bag-form]')) return;
+  e.preventDefault();
+  const f = e.target;
+  f.dataset.tried = '1';
+  const val = (n) => f.elements.namedItem(n)?.value?.trim() ?? '';
+  const items = lines(c.ctx);
+  if (!items.length) return;
+  const failed = validate(c);
+  sayMissing(c, failed);
+  if (failed.length) {
+    const first = ERROR_ORDER.find((name) => failed.includes(name));
+    f.querySelector(`[data-field="${first}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const focusable = first === 'ship' || first === 'pay' ? null : f.elements.namedItem(first);
+    focusable?.focus({ preventScroll: true });
+    return;
+  }
+  order = {
+    number: String(1000 + (Date.now() % 9000)),
+    name: val('name'),
+    address: val('address'),
+    city: val('city'),
+    country: val('country'),
+    ship: val('ship'),
+    pay: val('pay'),
+    items,
+    totals: totals(c.ctx, val('ship')), // before the bag is cleared
+  };
+  c.ctx.bag.clear(); // repaints through the bag subscription
+}
+
 /* ---------- Layout 1 · Atelier checkout ---------- */
 
 const atelier = {
@@ -433,290 +663,34 @@ const atelier = {
   },
 
   mount(el, ctx) {
-    const root = el.querySelector('[data-bag-root]');
-    const scroller = el.closest('.site-scroll');
-    const form = () => root.querySelector('[data-bag-form]');
-    const ship = () => form()?.elements.ship?.value ?? '';
-    const pay = () => form()?.elements.pay?.value ?? '';
-
-    // The motif shows only once its file has loaded: a detached probe, so a
-    // missing file never shows a broken image or an error.
-    const placeMotif = () => {
-      const slots = root.querySelectorAll('[data-motif]');
-      if (!slots.length || motifReady === false) return;
-      const fill = () => slots.forEach((s) => (s.innerHTML = `<img src="${MOTIF}" alt="" width="96" height="96" decoding="async">`));
-      if (motifReady) return fill();
-      const probe = new Image();
-      probe.onload = () => ((motifReady = true), root.isConnected && root.querySelectorAll('[data-motif]').forEach((s) => (s.innerHTML ||= `<img src="${MOTIF}" alt="" width="96" height="96" decoding="async">`)));
-      probe.onerror = () => (motifReady = false);
-      probe.src = MOTIF;
-    };
-
-    /* ----- Totals: the summary, the Place order button and the phone bar ----- */
-
-    const repaintTotals = () => {
-      const region = ship();
-      const t = totals(ctx, region);
-      root.querySelector('[data-bag-summary]').innerHTML = summaryHtml(ctx, region);
-      root.querySelectorAll('[data-submit-total], [data-bar-total]').forEach((n) => (n.textContent = formatPKR(t.total)));
-    };
-
-    /* ----- Inline errors ----- */
-
-    const showError = (name, message) => {
-      const f = form();
-      const box = f.querySelector(`[data-error-for="${name}"]`);
-      if (box) {
-        box.textContent = message;
-        box.hidden = !message;
-      }
-      f.querySelector(`[data-field="${name}"]`)?.classList.toggle('is-invalid', !!message);
-      f.querySelectorAll(`[name="${name}"]`).forEach((n) => n.setAttribute('aria-invalid', message ? 'true' : 'false'));
-    };
-
-    const checkField = (name) => {
-      const f = form();
-      const node = f.elements.namedItem(name);
-      if (!node || !RULES[name]) return '';
-      const message = RULES[name](node.value.trim(), ship());
-      showError(name, message);
-      return message;
-    };
-
-    // Everything Place order needs, in page order. Returns the names that failed.
-    const validate = () => {
-      const failed = [];
-      if (!REGIONS[ship()]) {
-        showError('ship', 'Choose where we are delivering to.');
-        failed.push('ship');
-      } else showError('ship', '');
-      for (const name of Object.keys(RULES)) if (checkField(name)) failed.push(name);
-      if (REGIONS[ship()] && !pay()) {
-        showError('pay', 'Choose how you would like to pay.');
-        failed.push('pay');
-      } else showError('pay', '');
-      return failed;
-    };
-
-    const ORDER = ['ship', 'name', 'phone', 'address', 'country', 'city', 'pay'];
-
-    // The note by Place order says how many details are still missing, or goes away.
-    const sayMissing = (failed) => {
-      const alert = root.querySelector('[data-form-alert]');
-      const n = failed.length;
-      alert.hidden = !n;
-      alert.textContent = n
-        ? `${n === 1 ? 'One detail is' : `${n} details are`} missing. ${n === 1 ? 'It is' : 'They are'} marked above.`
-        : '';
-    };
-    const recheck = () => form()?.dataset.tried && sayMissing(validate());
-
-    /* ----- Country reshapes the address fields and the payment choices ----- */
-
-    const KEEP = ['name', 'phone', 'email', 'address'];
-    const repaintDetails = () => {
-      const box = root.querySelector('[data-bag-details]');
-      const kept = {};
-      box.querySelectorAll('input').forEach((f) => KEEP.includes(f.name) && (kept[f.name] = f.value));
-      box.innerHTML = detailsHtml(ship());
-      box.querySelectorAll('input').forEach((f) => kept[f.name] && (f.value = kept[f.name]));
-      // After a first try, keep showing what is still missing.
-      if (form().dataset.tried) Object.keys(RULES).forEach(checkField);
-    };
-
-    // Nothing is offered before a country; then only that country's methods,
-    // chosen for the shopper only when there is just one.
-    const syncPayment = () => {
-      const f = form();
-      const region = ship();
-      const offered = paymentFor(region).map((m) => m.key);
-      f.querySelector('[data-field="pay"]').disabled = !region;
-      f.querySelectorAll('[name="pay"]').forEach((input) => {
-        const on = offered.includes(input.value);
-        input.disabled = !on;
-        input.closest('[data-option]').hidden = !on;
-        if (!on) input.checked = false;
-      });
-      if (region && offered.length === 1) f.querySelector(`[name="pay"][value="${offered[0]}"]`).checked = true;
-      f.dataset.pay = pay();
-      root.querySelector('[data-pay-first]').hidden = !!region;
-      root.querySelector('[data-pay-abroad]').hidden = !region || offered.length === PAYMENT.length;
-      if (pay()) showError('pay', '');
-    };
-
-    /* ----- Where the shopper is: the current step and the phone bar ----- */
-
-    const viewport = () => {
-      if (scroller && scroller.scrollHeight > scroller.clientHeight + 1) {
-        const r = scroller.getBoundingClientRect();
-        return { top: r.top, bottom: r.bottom };
-      }
-      return { top: 0, bottom: window.innerHeight };
-    };
-
+    const c = checkoutFor(el.querySelector('[data-bag-root]'), ctx);
     let frame = 0;
-    const track = () => {
-      frame = 0;
-      if (root.dataset.view !== 'checkout') return;
-      const v = viewport();
-      const h = v.bottom - v.top;
-      const sections = [...root.querySelectorAll('[data-checkout-step]')];
-      let currentId = sections[0]?.id;
-      sections.forEach((s) => {
-        if (s.getBoundingClientRect().top - v.top < h * 0.45) currentId = s.id;
-      });
-      root.querySelectorAll('[data-goto]').forEach((b) => {
-        const on = b.dataset.goto === currentId;
-        b.classList.toggle('is-current', on);
-        if (on) b.setAttribute('aria-current', 'step');
-        else b.removeAttribute('aria-current');
-      });
-
-      const bar = root.querySelector('[data-bag-bar]');
-      const country = root.querySelector('#bag-country');
-      const submit = root.querySelector('[data-submit]');
-      if (!bar || !country || !submit) return;
-      const inForm = country.getBoundingClientRect().top - v.top < h * 0.6;
-      const s = submit.getBoundingClientRect();
-      const submitVisible = s.top < v.bottom && s.bottom > v.top;
-      bar.dataset.mode = inForm ? 'place' : 'checkout';
-      bar.querySelector('[data-bar-label]').textContent = inForm ? 'Place order' : 'Checkout';
-      bar.classList.toggle('is-away', submitVisible);
-    };
     const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(track);
+      frame ||= requestAnimationFrame(() => {
+        frame = 0;
+        track(c);
+      });
     };
-
-    /* ----- Repaint when the bag changes ----- */
-
-    const paint = () => {
-      const kind = viewKind(ctx);
-      if (kind !== root.dataset.view) {
-        root.dataset.view = kind;
-        root.innerHTML = view(ctx, kind);
-        scroller?.scrollTo({ top: 0 });
-        window.scrollTo({ top: 0 });
-        placeMotif();
-        track();
-        return;
-      }
-      if (kind !== 'checkout') return;
-      const t = totals(ctx);
-      root.querySelector('[data-bag-items]').innerHTML = itemsHtml(ctx, lines(ctx)).join('');
-      root.querySelector('[data-bag-count-label]').textContent = `${t.count} ${pieceWord(t.count)}`;
-      repaintTotals();
+    const handlers = {
+      click: (e) => onClick(c, e),
+      change: (e) => onChange(c, e),
+      input: (e) => onInput(c, e),
+      submit: (e) => onSubmit(c, e),
     };
-
-    const scrollToId = (id) => root.querySelector(`#${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    const onClick = (e) => {
-      const qtyBtn = e.target.closest('[data-qty]');
-      if (qtyBtn) {
-        const i = +qtyBtn.dataset.qty;
-        const line = ctx.bag.list()[i];
-        if (line) ctx.bag.setQty(i, line.qty + +qtyBtn.dataset.step);
-        return;
-      }
-      const removeBtn = e.target.closest('[data-remove]');
-      if (removeBtn) {
-        ctx.bag.remove(+removeBtn.dataset.remove);
-        return;
-      }
-      const stepLink = e.target.closest('[data-goto]');
-      if (stepLink) {
-        scrollToId(stepLink.dataset.goto);
-        return;
-      }
-      if (e.target.closest('[data-fill-example]')) {
-        EXAMPLE_BAG.forEach(([piece, size, qty, dupatta]) => ctx.bag.add(piece, size, qty, dupatta));
-        return;
-      }
-      const barBtn = e.target.closest('[data-bar-action]');
-      if (barBtn) {
-        if (barBtn.closest('[data-bag-bar]').dataset.mode === 'place') form().requestSubmit();
-        else scrollToId('bag-country');
-        return;
-      }
-      if (e.target.closest('[data-new-order]')) order = null;
-    };
-
-    const onChange = (e) => {
-      if (e.target.name === 'ship') {
-        showError('ship', '');
-        repaintDetails();
-        syncPayment();
-        repaintTotals();
-        recheck();
-        return;
-      }
-      if (e.target.name === 'pay') {
-        form().dataset.pay = e.target.value;
-        showError('pay', '');
-        recheck();
-        return;
-      }
-      recheck();
-    };
-
-    // Once a field has shown an error, it clears as soon as the value is fine.
-    const onInput = (e) => {
-      const name = e.target.name;
-      if (!RULES[name] || !form()?.querySelector(`[data-field="${name}"].is-invalid`)) return;
-      recheck();
-    };
-
-    // A demo: nothing is sent anywhere. The fields are checked first.
-    const onSubmit = (e) => {
-      if (!e.target.matches('[data-bag-form]')) return;
-      e.preventDefault();
-      const f = e.target;
-      f.dataset.tried = '1';
-      const val = (n) => f.elements.namedItem(n)?.value?.trim() ?? '';
-      const items = lines(ctx);
-      if (!items.length) return;
-      const failed = validate();
-      sayMissing(failed);
-      if (failed.length) {
-        const first = ORDER.find((name) => failed.includes(name));
-        const target = f.querySelector(`[data-field="${first}"]`);
-        target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        const focusable = first === 'ship' || first === 'pay' ? null : f.elements.namedItem(first);
-        focusable?.focus({ preventScroll: true });
-        return;
-      }
-      order = {
-        number: String(1000 + (Date.now() % 9000)),
-        name: val('name'),
-        address: val('address'),
-        city: val('city'),
-        country: val('country'),
-        ship: val('ship'),
-        pay: val('pay'),
-        items,
-        totals: totals(ctx, val('ship')), // before the bag is cleared
-      };
-      ctx.bag.clear(); // repaints through the subscription below
-    };
-
-    const unsubscribe = ctx.bag.subscribe(paint);
-    root.addEventListener('click', onClick);
-    root.addEventListener('change', onChange);
-    root.addEventListener('input', onInput);
-    root.addEventListener('submit', onSubmit);
-    document.addEventListener('scroll', onScroll, { capture: true, passive: true });
+    for (const [type, fn] of Object.entries(handlers)) c.root.addEventListener(type, fn);
+    const unsubscribe = ctx.bag.subscribe(() => paint(c));
+    const unScroll = onSiteScroll(onScroll);
     window.addEventListener('resize', onScroll);
-    placeMotif();
-    track();
+    watchBar(c);
+    track(c);
 
     return () => {
       unsubscribe();
-      root.removeEventListener('click', onClick);
-      root.removeEventListener('change', onChange);
-      root.removeEventListener('input', onInput);
-      root.removeEventListener('submit', onSubmit);
-      document.removeEventListener('scroll', onScroll, { capture: true });
+      for (const [type, fn] of Object.entries(handlers)) c.root.removeEventListener(type, fn);
+      unScroll();
       window.removeEventListener('resize', onScroll);
       if (frame) cancelAnimationFrame(frame);
+      c.unBar();
       // Keep the confirmation across Name/Frame switches; forget it once the reviewer leaves.
       if (current().page !== 'bag') order = null;
     };

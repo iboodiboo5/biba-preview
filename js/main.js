@@ -11,6 +11,7 @@ import * as state from './state.js';
 import { renderToolbar } from './toolbar.js';
 import { renderSite } from './site.js';
 import { renderFavourites } from './favourites-view.js';
+import { siteScroller as scroller } from './ui.js';
 import './shortcuts.js';
 
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -19,8 +20,6 @@ const positions = new Map(); // entry id -> scroll top when the reviewer left it
 let entry = null;
 let lastView = '';
 let seq = 0;
-
-const scroller = () => (state.isNarrow() ? document.scrollingElement : document.querySelector('#site .site-scroll'));
 
 function scrollTo(y) {
   const el = scroller();

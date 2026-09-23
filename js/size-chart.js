@@ -7,7 +7,9 @@
 //   markSizeChartRow(root, size)                  → mark one size's row ('' clears)
 //
 // Every value cell carries data-in and data-cm, every row data-size-row, so a Page
-// can switch units or mark the chosen size without re-rendering.
+// can switch units or mark the chosen size without re-rendering. A group row over
+// the columns labels the measurements "Body" (bust, waist, hips) or "Finished
+// garment" (the lengths), from each column's group in SIZE_CHART.
 
 import { html } from './ui.js';
 import { SIZES, SIZE_CHART } from './pieces.js';
@@ -34,6 +36,7 @@ export function sizeChart({ units = 'in', highlight = '', caption = '', cls = ''
     <table class="size-chart__table">
       ${caption && `<caption class="size-chart__caption">${caption}</caption>`}
       <thead>
+        ${groupRow()}
         <tr>
           <th scope="col">Size</th>
           ${SIZE_CHART.columns.map(([, label]) => `<th scope="col">${label}</th>`)}
@@ -52,6 +55,20 @@ export function sizeChart({ units = 'in', highlight = '', caption = '', cls = ''
       </tbody>
     </table>
   </div>`;
+}
+
+/** "Body" over the body measurements, "Finished garment" over the lengths: one cell per run of columns. */
+function groupRow() {
+  const runs = [];
+  for (const [, , group] of SIZE_CHART.columns) {
+    const last = runs[runs.length - 1];
+    if (last && last.group === group) last.span++;
+    else runs.push({ group, span: 1 });
+  }
+  if (!runs.some((r) => r.group)) return '';
+  return `<tr class="size-chart__groups"><td></td>${runs
+    .map((r) => `<th scope="colgroup" colspan="${r.span}">${SIZE_CHART.groups?.[r.group] ?? ''}</th>`)
+    .join('')}</tr>`;
 }
 
 /** Switch every size chart inside `root` to 'in' or 'cm'. */

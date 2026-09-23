@@ -17,11 +17,15 @@
 // Feedback: a missing size shows an error under the Size row, outlines the size
 // buttons and moves focus to them; adding shows a toast just under the header.
 
-import { html, esc, media, pieceCard, sectionHead, sampleTag } from '../ui.js';
+import {
+  html, esc, media, pieceCard, sectionHead, sampleTag, soldTag, SOLD_PRICE, fieldError, showFieldError,
+  siteScroller, siteViewport, watchBottomBar,
+} from '../ui.js';
+import { webpFor } from '../images.js';
 import { sizeChart, markSizeChartRow } from '../size-chart.js';
 import {
   SIZES, SIZE_CHART, TROUSERS, FABRIC, CARE, DISPATCH, DELIVERY, EXCHANGES,
-  formatPKR, whatsappLink, isSample, paymentText,
+  formatPKR, whatsappLink, isSample, paymentText, pieceCount,
 } from '../pieces.js';
 
 /* ---------- Parts ---------- */
@@ -43,12 +47,12 @@ function nextPieces(ctx, n) {
     .slice(0, n);
 }
 
-/** The print swatch's file from the image resolver, for tiling as a fabric surface. */
+/** The print swatch from the image resolver (its WebP), for tiling as a fabric surface. */
 function printTile(ctx, p) {
   const { src } = ctx.pieceSrc(p, 'print');
   // Absolute, because a url() inside a custom property resolves against the stylesheet that uses it.
   // No file: leave the property unset and the tile shows its plain media ground.
-  return src ? `--piece-print: url('${new URL(src, document.baseURI).href}');` : '';
+  return src ? `--piece-print: url('${new URL(webpFor(src, 600), document.baseURI).href}');` : '';
 }
 
 const trouserName = (p) => TROUSERS[p.trouser].toLowerCase();
@@ -73,28 +77,10 @@ function sizeChips(p) {
 /** The size chart, folded into the buying column; opened and closed by the one "Size chart" button (or Esc). */
 const chartId = (p) => `piece-l1-chart-${p.key}`;
 
-/** Which chart columns are body measurements; the rest (the lengths) are the finished garment. */
-const BODY_COLUMNS = ['bust', 'waist', 'hips'];
-
-/**
- * The shared chart with a group row over its columns: "Body" over bust, waist and
- * hips, "Finished garment" over the lengths, so the columns agree with the footnote.
- * (This row belongs in js/size-chart.js so Help gets it too: see ticket 04's Comments.)
- */
-function groupedChart() {
-  const keys = SIZE_CHART.columns.map(([key]) => key);
-  const body = keys.filter((k) => BODY_COLUMNS.includes(k)).length;
-  const garment = keys.length - body;
-  const groups = `<tr class="piece-l1__chart-groups"><td></td>${
-    body ? `<th scope="colgroup" colspan="${body}">Body</th>` : ''
-  }${garment ? `<th scope="colgroup" colspan="${garment}">Finished garment</th>` : ''}</tr>`;
-  return sizeChart().replace('<thead>', `<thead>${groups}`);
-}
-
 function chartPanel(p) {
   return html`<div class="piece-l1__chart" id="${chartId(p)}" data-chart hidden>
     <p class="piece-l1__chart-title">Size chart, in inches</p>
-    ${groupedChart()}
+    ${sizeChart()}
     <p class="piece-l1__chart-note s-meta">Body: measure yourself at the bust, waist and hips. Finished garment: the length of the kurta and shalwar as made.${SIZE_CHART.placeholder ? ' Placeholder figures until the final chart is in.' : ''} No custom sizing.</p>
   </div>`;
 }
@@ -116,7 +102,7 @@ function buyForm(ctx, p) {
       <button class="piece-buy__guide" type="button" data-chart-toggle aria-expanded="false" aria-controls="${chartId(p)}">Size chart</button>
     </div>
     ${sizeChips(p)}
-    <p class="piece-buy__error" id="${sizeErrorId(p)}" data-size-error hidden>Choose a size first.</p>
+    ${fieldError({ id: sizeErrorId(p), cls: 'piece-l1__size-error' })}
     ${chartPanel(p)}
     ${!p.soldOut && fitLine(ctx, p)}
 
@@ -138,15 +124,15 @@ function buyForm(ctx, p) {
       <button class="s-btn piece-buy__add" type="submit"${p.soldOut ? ' disabled aria-disabled="true"' : ''}>${p.soldOut ? 'Sold out' : 'Add to bag'}</button>
       <a class="s-btn s-btn--quiet piece-buy__wa" href="${whatsappHref(ctx, p)}" target="_blank" rel="noopener" data-wa>${p.soldOut ? 'Ask on WhatsApp' : 'Order on WhatsApp'}</a>
     </div>
-    ${p.soldOut && `<p class="s-meta piece-buy__note">${p.name} has sold out: stock is limited. Message us on WhatsApp to hear if it comes back.</p>`}
+    ${p.soldOut && `<p class="s-meta piece-l1__sold-note">${p.name} has sold out: stock is limited. Message us on WhatsApp to hear if it comes back.</p>`}
   </form>`;
 }
 
-/** The phone's buy bar, at the foot of the screen. Not rendered for a sold-out Piece. */
+/** The phone's buy bar (the shared .bottom-bar), at the foot of the screen. Not rendered for a sold-out Piece. */
 function buyBar(p) {
   if (p.soldOut) return '';
-  return html`<div class="piece-l1__bar" data-bar>
-    <button class="s-btn piece-l1__bar-add" type="button" data-bar-add>Add to bag · <span data-total>${formatPKR(p.price)}</span></button>
+  return html`<div class="bottom-bar piece-l1__bar" data-bar>
+    <button class="s-btn bottom-bar__btn" type="button" data-bar-add>Add to bag · <span data-total>${formatPKR(p.price)}</span></button>
   </div>`;
 }
 
@@ -186,8 +172,7 @@ function wireBuying(el, ctx, p) {
 
   const setAsking = (on) => {
     all('[data-piece-buy]').forEach((f) => f.classList.toggle('is-asking', on));
-    all('[data-size-error]').forEach((n) => (n.hidden = !on));
-    all('[data-sizes]').forEach((g) => (on ? g.setAttribute('aria-invalid', 'true') : g.removeAttribute('aria-invalid')));
+    showFieldError(el.querySelector(`#${sizeErrorId(p)}`), on ? 'Choose a size first.' : '', all('[data-sizes]'));
   };
 
   const sync = () => {
@@ -226,7 +211,7 @@ function wireBuying(el, ctx, p) {
           <div class="piece-l1__toast-body">
             <p class="piece-l1__toast-head">Added to your bag</p>
             <p class="piece-l1__toast-line">${esc(p.name)} · size ${size} · ${what}</p>
-            <p class="piece-l1__toast-line s-meta">${formatPKR(total())} · ${count} ${count === 1 ? 'piece' : 'pieces'} in your bag</p>
+            <p class="piece-l1__toast-line s-meta">${formatPKR(total())} · ${pieceCount(count)} in your bag</p>
           </div>
           <a class="s-btn piece-l1__toast-view" href="${ctx.href({ page: 'bag' })}">View bag</a>
           <button class="piece-l1__toast-close" type="button" data-toast-close aria-label="Close">×</button>
@@ -242,9 +227,9 @@ function wireBuying(el, ctx, p) {
     const row = el.querySelector('[data-sizes]');
     // Brings the row into view only when it is off screen (the phone bar can be far
     // from it), then focuses without jumping again.
-    const view = el.closest('.site-scroll')?.getBoundingClientRect() ?? { top: 0, bottom: innerHeight };
+    const view = siteViewport();
     const box = row?.getBoundingClientRect();
-    const header = el.closest('.site-scroll')?.querySelector('.site-header')?.offsetHeight ?? 0;
+    const header = document.querySelector('#site .site-header')?.offsetHeight ?? 0;
     const bar = el.querySelector('[data-bar]')?.offsetHeight ?? 0;
     if (box && (box.top < view.top + header || box.bottom + 40 > view.bottom - bar)) {
       row.scrollIntoView({ block: 'center', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
@@ -347,7 +332,7 @@ const atelier = {
         <div class="wrap piece-l1__grid">
           <div class="piece-l1__pics">
             <div class="piece-l1__gallery">
-              <figure class="piece-l1__lead">${media(ctx.pieceImg(p, 'front', { loading: 'eager', alt: `${p.name}, worn` }))}</figure>
+              <figure class="piece-l1__lead">${media(ctx.pieceImg(p, 'front', { loading: 'eager', priority: 'high', alt: `${p.name}, worn` }) + (p.soldOut ? soldTag() : ''))}</figure>
               <figure class="piece-l1__shot">${media(ctx.pieceImg(p, 'detail', { loading: 'eager', alt: `${p.name}, close up` }))}<figcaption class="s-caption">Close up</figcaption></figure>
               <figure class="piece-l1__cloth">
                 <div class="piece-l1__cloth-tile" style="${printTile(ctx, p)}" role="img" aria-label="The ${p.name} print"></div>
@@ -364,8 +349,9 @@ const atelier = {
             <div class="piece-l1__titles">
               <h1 class="s-display s-display--m piece-l1__name">${p.name}</h1>
               <p class="piece-l1__price-row">
-                <span class="s-price piece-l1__price">${formatPKR(p.price)}</span>
-                ${p.soldOut && '<span class="piece-l1__sold">Sold out</span>'}
+                ${p.soldOut
+                  ? `<span class="piece-l1__price ${SOLD_PRICE}">Sold out</span>`
+                  : `<span class="s-price piece-l1__price">${formatPKR(p.price)}</span>`}
               </p>
               ${isSample(p) && sampleTag('piece-l1__sample')}
             </div>
@@ -392,22 +378,24 @@ const atelier = {
     // A buying column taller than the screen sticks by its foot instead of its head,
     // so the last fact is always reachable (the size chart makes it taller when open).
     const panel = el.querySelector('.piece-l1__panel');
-    const scroller = el.closest('.site-scroll');
     const fit = () => {
-      if (!scroller) return;
-      const head = (scroller.querySelector('.site-header')?.offsetHeight ?? 0) + 28;
-      const foot = scroller.clientHeight - panel.offsetHeight - 28;
+      const view = siteViewport();
+      const head = (document.querySelector('#site .site-header')?.offsetHeight ?? 0) + 28;
+      const foot = view.bottom - view.top - panel.offsetHeight - 28;
       panel.style.top = `${Math.min(head, foot)}px`;
     };
     const ro = new ResizeObserver(fit);
     ro.observe(panel);
+    const scroller = siteScroller();
     if (scroller) ro.observe(scroller);
     const unwire = wireBuying(el, ctx, ctx.piece);
     const unDots = wireDots(el);
+    const unBar = watchBottomBar(el.querySelector('[data-bar]'));
     return () => {
       ro.disconnect();
       unwire();
       unDots();
+      unBar();
     };
   },
 };

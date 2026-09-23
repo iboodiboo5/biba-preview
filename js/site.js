@@ -7,13 +7,12 @@ import { PIECES, DROP, DISPATCH, pieceByKey, whatsappLink } from './pieces.js';
 import { brandFor } from './brand.js';
 import { img, pieceImg, resolve, pieceImageName } from './images.js';
 import { wordmark } from './wordmark.js';
-import { html, placeholder, motif } from './ui.js';
+import { html, placeholder, motif, siteScroller, siteViewport, onSiteScroll } from './ui.js';
 import * as bag from './bag-store.js';
 
 const $ = (sel) => document.querySelector(sel);
 const site = $('#site');
 const stage = $('#stage');
-const scroller = site.querySelector('.site-scroll');
 const top = site.querySelector('.site-top');
 const main = site.querySelector('.site-main');
 const bottom = site.querySelector('.site-bottom');
@@ -100,8 +99,9 @@ export async function renderSite(s) {
     }
   }
 
+  // A new view starts at the top (main.js restores the scroll when going back).
   const viewKey = `${s.page}|${s.piece}|${ctx.layout}`;
-  if (viewKey !== lastViewKey) scroller.scrollTop = 0;
+  if (viewKey !== lastViewKey) siteScroller().scrollTop = 0;
   lastViewKey = viewKey;
   updateHeader();
   fitDevice();
@@ -113,16 +113,17 @@ export async function renderSite(s) {
 // section while that section sits at rest under it. As soon as the section
 // starts sliding up under the stuck header (a see-through bar there would
 // collide with the banner's own caption), #site gets .is-header-solid and the
-// header becomes a solid sticky bar (styles/base.css).
+// header becomes a solid sticky bar (styles/base.css). Whatever scrolls is
+// watched: the document in the native phone Frame, .site-scroll elsewhere.
 const SOLID_AFTER = 24; // px of banner scrolled under the stuck header
 function updateHeader() {
   const overlay = site.dataset.header === 'overlay';
   const banner = overlay && main.querySelector('.page > :first-child');
   let solid = false;
-  if (banner) solid = banner.getBoundingClientRect().top < scroller.getBoundingClientRect().top - SOLID_AFTER;
+  if (banner) solid = banner.getBoundingClientRect().top < siteViewport().top - SOLID_AFTER;
   site.classList.toggle('is-header-solid', solid);
 }
-scroller.addEventListener('scroll', updateHeader, { passive: true });
+onSiteScroll(updateHeader);
 
 /* ---------- Browser tab: title and icon follow the Name ---------- */
 

@@ -148,15 +148,8 @@
   border-color: var(--c-accent);
   box-shadow: 0 0 0 1px var(--c-accent);
 }
-.p-piece .piece-buy__error {
+.p-piece .piece-l1__size-error {
   margin-top: -2px;
-  font-family: var(--f-ui);
-  font-size: var(--fs-meta);
-  font-weight: 500;
-  color: var(--c-accent);
-}
-.p-piece .piece-buy__error[hidden] {
-  display: none;
 }
 
 /* The size chart, folded open under the size buttons. The "Size chart" button is its one close control. */
@@ -177,19 +170,6 @@
 }
 .p-piece .piece-l1__chart .size-chart__table tbody tr:last-child > * {
   border-bottom: 0;
-}
-.p-piece .piece-l1__chart-groups > * {
-  padding-block: 0 4px;
-  border-bottom: 0;
-  font-family: var(--f-ui);
-  font-size: var(--fs-meta);
-  font-weight: 600;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--c-ink);
-}
-.p-piece .piece-l1__chart-groups th + th {
-  border-left: var(--hairline) solid var(--c-line);
 }
 .p-piece .piece-l1__chart-note {
   font-size: 0.75rem;
@@ -385,7 +365,7 @@
   color: var(--c-ink);
 }
 
-.p-piece .piece-buy__note {
+.p-piece .piece-l1__sold-note {
   margin-top: 2px;
 }
 
@@ -491,19 +471,6 @@
 .piece-l1__price {
   font-size: 1.0625rem;
 }
-.piece-l1__sold {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  padding: 0 10px;
-  border-radius: var(--radius-btn);
-  background: var(--c-ink);
-  color: var(--c-bg);
-  font-family: var(--f-ui);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-}
 .piece-l1__desc {
   max-width: 26rem;
 }
@@ -530,10 +497,6 @@
   gap: var(--grid-gap-y) var(--grid-gap-x);
 }
 
-/* The phone's buy bar: hidden on desktop */
-.piece-l1__bar {
-  display: none;
-}
 
 /* =====================================================================
    Tablet
@@ -668,20 +631,6 @@
     display: none;
   }
 
-  .piece-l1__bar {
-    position: sticky;
-    bottom: 0;
-    z-index: 20;
-    display: block;
-    padding: 10px var(--gutter) max(10px, env(safe-area-inset-bottom));
-    background: color-mix(in srgb, var(--c-bg) 94%, transparent);
-    border-top: var(--hairline) solid var(--c-line);
-    backdrop-filter: blur(8px);
-  }
-  .piece-l1__bar-add {
-    width: 100%;
-    min-height: 50px;
-  }
 
   .piece-l1__toast {
     right: var(--gutter);

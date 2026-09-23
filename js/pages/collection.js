@@ -40,7 +40,7 @@ const grid = {
             )}
           </div>
           <p class="collection-l1__empty s-meta" hidden>No pieces in this style yet.</p>
-          <p class="collection-l1__note s-meta">Design names and prices are placeholders for now. Pieces marked "Sample design" show sample print ideas until the next designs are ready.</p>
+          <p class="collection-l1__note s-meta">Design names and prices are placeholders for now, and pieces marked "Sample design" show sample print ideas until the next designs are ready.</p>
         </div>
       </section>
     `;
